@@ -6,24 +6,24 @@
     <description>Versiones oficiales de Aerio por Hackerdito</description>
     <language>es</language>
     <item>
-      <title>Aerio 3.3</title>
+      <title>Aerio 3.4</title>
       <description><![CDATA[
-        <h2>Aerio 3.3</h2>
+        <h2>Aerio 3.4</h2>
         <ul>
-          <li>Velocidad de Internet en Mbps grandes y en vivo.</li>
-          <li>Cálculo autorizado de MB/GB y elementos de Papelera.</li>
+          <li>Características del Mac y tarjetas superiores alineadas.</li>
+          <li>Detección de Papelera principal y volúmenes externos.</li>
           <li>Icono original permanente y multirresolución.</li>
         </ul>
       ]]></description>
       <pubDate>Tue, 25 Aug 2026 23:30:00 -0600</pubDate>
-      <sparkle:version>7</sparkle:version>
-      <sparkle:shortVersionString>3.3</sparkle:shortVersionString>
+      <sparkle:version>8</sparkle:version>
+      <sparkle:shortVersionString>3.4</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-      <enclosure url="https://aerio-three.vercel.app/aerio/Aerio-3.3.zip"
-                 length="980895"
+      <enclosure url="https://aerio-three.vercel.app/aerio/Aerio-3.4.zip"
+                 length="988149"
                  type="application/octet-stream"
-                 sparkle:version="7"
-                 sparkle:shortVersionString="3.3" />
+                 sparkle:version="8"
+                 sparkle:shortVersionString="3.4" />
     </item>
   </channel>
 </rss>
