@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleDevelopmentRegion</key><string>es</string>
+  <key>CFBundleDisplayName</key><string>Aerio</string>
+  <key>CFBundleExecutable</key><string>Aerio</string>
+  <key>CFBundleIconFile</key><string>AerioIconPermanent</string>
+  <key>CFBundleIdentifier</key><string>art.gerardodg.aerio</string>
+  <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+  <key>CFBundleName</key><string>Aerio</string>
+  <key>CFBundlePackageType</key><string>APPL</string>
+  <key>CFBundleShortVersionString</key><string>3.8</string>
+  <key>CFBundleVersion</key><string>12</string>
+  <key>LSMinimumSystemVersion</key><string>13.0</string>
+  <key>NSHighResolutionCapable</key><true/>
+  <key>NSAppleEventsUsageDescription</key><string>Aerio utiliza Finder únicamente cuando confirmas que deseas vaciar la Papelera.</string>
+  <key>NSHumanReadableCopyright</key><string>© Hackerdito · gerardodg.art</string>
+</dict>
+</plist>
