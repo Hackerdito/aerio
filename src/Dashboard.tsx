@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
-import { Download, Users, ArrowUpRight, Clock, Shield, LogOut } from 'lucide-react';
+import { Download, Users, ArrowUpRight, Clock, Shield, LogOut, ChevronDown, ChevronUp, Globe2, Monitor } from 'lucide-react';
 import { cn } from './lib/utils';
 import { db, auth, logout } from './lib/firebase';
-import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,7 +13,9 @@ export default function Dashboard() {
 
   const [totalDownloads, setTotalDownloads] = useState(0);
   const [totalVisits, setTotalVisits] = useState(0);
-  const [recentVisits, setRecentVisits] = useState<any[]>([]);
+  const [allVisits, setAllVisits] = useState<any[]>([]);
+  const [allDownloads, setAllDownloads] = useState<any[]>([]);
+  const [expandedIp, setExpandedIp] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -24,37 +26,66 @@ export default function Dashboard() {
   useEffect(() => {
     if (!user) return;
 
-    // Listen to downloads
-    const qDownloads = query(collection(db, 'downloads'));
+    // Listen to all downloads
+    const qDownloads = query(collection(db, 'downloads'), orderBy('timestamp', 'desc'));
     const unsubDownloads = onSnapshot(qDownloads, (snapshot) => {
       setTotalDownloads(snapshot.size);
+      setAllDownloads(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
-    // Listen to visits
-    const qVisits = query(collection(db, 'visits'), orderBy('timestamp', 'desc'), limit(15));
-    const unsubVisits = onSnapshot(qVisits, (snapshot) => {
-      // Total visits in this snapshot is just the last 15, but we want all sizes if possible, 
-      // however size of all can be expensive. For this prototype, we'll listen to all visits for the total count.
-      // Doing two queries for visits.
-    });
-
-    const qVisitsAll = query(collection(db, 'visits'));
+    // Listen to all visits
+    const qVisitsAll = query(collection(db, 'visits'), orderBy('timestamp', 'desc'));
     const unsubVisitsAll = onSnapshot(qVisitsAll, (snapshot) => {
       setTotalVisits(snapshot.size);
-    });
-
-    const qVisitsRecent = query(collection(db, 'visits'), orderBy('timestamp', 'desc'), limit(15));
-    const unsubVisitsRecent = onSnapshot(qVisitsRecent, (snapshot) => {
-      const visitsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setRecentVisits(visitsData);
+      setAllVisits(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
     return () => {
       unsubDownloads();
       unsubVisitsAll();
-      unsubVisitsRecent();
     };
   }, [user]);
+
+  const groupedTraffic = useMemo(() => {
+    const map = new Map<string, any>();
+    
+    allVisits.forEach(v => {
+      if (!v.ip) return;
+      if (!map.has(v.ip)) {
+        map.set(v.ip, {
+          ip: v.ip,
+          country: v.country || 'Desconocido',
+          city: v.city || 'Desconocido',
+          userAgent: v.userAgent || 'Desconocido',
+          visitDates: [],
+          downloadDates: []
+        });
+      }
+      if (v.timestamp) map.get(v.ip).visitDates.push(v.timestamp.toDate());
+    });
+
+    allDownloads.forEach(d => {
+      if (!d.ip) return;
+      if (!map.has(d.ip)) {
+        map.set(d.ip, {
+          ip: d.ip,
+          country: d.country || 'Desconocido',
+          city: d.city || 'Desconocido',
+          userAgent: 'Desconocido',
+          visitDates: [],
+          downloadDates: []
+        });
+      }
+      if (d.timestamp) map.get(d.ip).downloadDates.push(d.timestamp.toDate());
+    });
+
+    return Array.from(map.values()).sort((a, b) => {
+      const getLatest = (dates: Date[]) => dates.length > 0 ? Math.max(...dates.map(d => d.getTime())) : 0;
+      const latestA = Math.max(getLatest(a.visitDates), getLatest(a.downloadDates));
+      const latestB = Math.max(getLatest(b.visitDates), getLatest(b.downloadDates));
+      return latestB - latestA;
+    });
+  }, [allVisits, allDownloads]);
 
   if (loading || !user) {
     return <div className="min-h-screen bg-[#0a0510] text-white flex items-center justify-center">Cargando...</div>;
@@ -65,7 +96,7 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">Panel de Estadísticas</h1>
             <p className="text-white/50">Rendimiento en tiempo real de tu aplicación Aerio.</p>
@@ -89,7 +120,7 @@ export default function Dashboard() {
         </div>
 
         {/* Top Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <StatCard 
             title="Descargas Totales" 
             value={totalDownloads.toLocaleString()} 
@@ -102,31 +133,89 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Lower Section: Recent Activity */}
+        {/* Lower Section: Grouped Activity */}
         <div className="grid grid-cols-1 gap-6">
-          
-          {/* Recent Activity */}
-          <div className="bg-[#130b1c] border border-white/5 rounded-2xl p-6 h-[500px] overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-6">Tráfico Reciente (Últimas 15 visitas)</h2>
-            <div className="space-y-4">
-              {recentVisits.map((visit) => (
-                <div key={visit.id} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0 last:pb-0">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                      <Clock className="w-4 h-4 text-white/50" />
+          <div className="bg-[#130b1c] border border-white/5 rounded-2xl p-6 overflow-hidden flex flex-col max-h-[800px]">
+            <h2 className="text-lg font-semibold mb-6 shrink-0">Tráfico Agrupado por IP ({groupedTraffic.length} visitantes únicos)</h2>
+            <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar">
+              {groupedTraffic.map((visitor) => {
+                const isExpanded = expandedIp === visitor.ip;
+                return (
+                  <div key={visitor.ip} className="bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden transition-all duration-300">
+                    <div 
+                      onClick={() => setExpandedIp(isExpanded ? null : visitor.ip)}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-4 cursor-pointer hover:bg-white/[0.04]"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center shrink-0">
+                          <Users className="w-5 h-5 text-white/50" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-base font-semibold text-white/90">{visitor.ip}</span>
+                          <span className="text-xs text-white/50 flex items-center gap-1 mt-1">
+                            <Globe2 className="w-3 h-3" /> {visitor.city}, {visitor.country}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-4 mt-3 sm:mt-0">
+                        <div className="flex gap-2">
+                          <span className="px-2.5 py-1 rounded-full bg-[#ff007f]/10 text-[#ff007f] text-xs font-medium border border-[#ff007f]/20" title="Total Visitas">
+                            {visitor.visitDates.length} {visitor.visitDates.length === 1 ? 'visita' : 'visitas'}
+                          </span>
+                          {visitor.downloadDates.length > 0 && (
+                            <span className="px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-medium border border-blue-500/20" title="Total Descargas">
+                              {visitor.downloadDates.length} {visitor.downloadDates.length === 1 ? 'descarga' : 'descargas'}
+                            </span>
+                          )}
+                        </div>
+                        {isExpanded ? <ChevronUp className="w-5 h-5 text-white/40" /> : <ChevronDown className="w-5 h-5 text-white/40" />}
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-white/90">IP: {visit.ip}</span>
-                      <span className="text-xs text-white/40 truncate max-w-[200px] md:max-w-md" title={visit.userAgent}>{visit.userAgent}</span>
-                    </div>
+                    
+                    {isExpanded && (
+                      <div className="p-4 pt-0 border-t border-white/5 bg-black/20">
+                        <div className="mt-4 mb-4 flex items-start gap-2 text-xs text-white/50 bg-black/40 p-3 rounded-lg border border-white/5">
+                          <Monitor className="w-4 h-4 shrink-0 mt-0.5" />
+                          <span className="break-all">{visitor.userAgent}</span>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <h4 className="text-sm font-medium text-white/70 mb-3 flex items-center gap-2">
+                              <Clock className="w-4 h-4" /> Historial de Visitas
+                            </h4>
+                            <ul className="space-y-2 max-h-40 overflow-y-auto pr-2">
+                              {visitor.visitDates.sort((a: any, b: any) => b.getTime() - a.getTime()).map((date: Date, idx: number) => (
+                                <li key={idx} className="text-xs text-white/50 bg-white/5 px-3 py-2 rounded-md">
+                                  {date.toLocaleString()}
+                                </li>
+                              ))}
+                              {visitor.visitDates.length === 0 && <li className="text-xs text-white/30">Sin registros</li>}
+                            </ul>
+                          </div>
+                          
+                          <div>
+                            <h4 className="text-sm font-medium text-white/70 mb-3 flex items-center gap-2">
+                              <Download className="w-4 h-4" /> Historial de Descargas
+                            </h4>
+                            <ul className="space-y-2 max-h-40 overflow-y-auto pr-2">
+                              {visitor.downloadDates.sort((a: any, b: any) => b.getTime() - a.getTime()).map((date: Date, idx: number) => (
+                                <li key={idx} className="text-xs text-blue-400/70 bg-blue-500/10 px-3 py-2 rounded-md">
+                                  {date.toLocaleString()}
+                                </li>
+                              ))}
+                              {visitor.downloadDates.length === 0 && <li className="text-xs text-white/30">Aún no ha descargado</li>}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <span className="text-sm text-white/40 text-right whitespace-nowrap">
-                    {visit.timestamp ? new Date(visit.timestamp.toDate()).toLocaleString() : 'Justo ahora'}
-                  </span>
-                </div>
-              ))}
-              {recentVisits.length === 0 && (
-                <div className="text-center text-white/50 py-10">No hay visitas registradas aún.</div>
+                );
+              })}
+              {groupedTraffic.length === 0 && (
+                <div className="text-center text-white/50 py-10">No hay tráfico registrado aún.</div>
               )}
             </div>
           </div>

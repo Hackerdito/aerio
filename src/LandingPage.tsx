@@ -10,19 +10,23 @@ export default function LandingPage() {
   const [showAllVersions, setShowAllVersions] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [userIp, setUserIp] = useState<string>('unknown');
+  const [userGeo, setUserGeo] = useState<{country?: string, city?: string}>({});
 
   useEffect(() => {
     // Record visit
     const recordVisit = async () => {
       try {
-        const response = await fetch('https://api.ipify.org?format=json');
+        const response = await fetch('https://get.geojs.io/v1/ip/geo.json');
         const data = await response.json();
         setUserIp(data.ip);
+        setUserGeo({ country: data.country, city: data.city });
 
         // Only log once per session to avoid spamming database in dev
         if (!sessionStorage.getItem('visitLogged')) {
           await addDoc(collection(db, 'visits'), {
             ip: data.ip,
+            country: data.country || 'Unknown',
+            city: data.city || 'Unknown',
             timestamp: serverTimestamp(),
             userAgent: navigator.userAgent
           });
@@ -42,6 +46,8 @@ export default function LandingPage() {
     try {
       await addDoc(collection(db, 'downloads'), {
         ip: userIp,
+        country: userGeo.country || 'Unknown',
+        city: userGeo.city || 'Unknown',
         timestamp: serverTimestamp()
       });
     } catch (error) {
@@ -94,13 +100,16 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-purple-500/30 font-sans pb-12 overflow-x-hidden relative">
+    <>
+      {/* [CUSTOMIZACIÓN - FONDO PRINCIPAL]: "bg-black" es el color de fondo, "text-white" el texto principal. */}
+      <div className="min-h-screen bg-black text-white selection:bg-purple-500/30 font-sans pb-12 overflow-x-hidden relative">
       
-      {/* Static Background Image */}
-      <div 
-        className="absolute top-0 left-0 w-full h-[95vh] md:h-[900px] z-0 bg-cover bg-top bg-no-repeat"
-        style={{ backgroundImage: "url('https://aerio-three.vercel.app/bg.png')" }}
-      >
+        {/* Static Background Image */}
+        {/* [CUSTOMIZACIÓN - IMAGEN FONDO]: Cambia aquí el alto (h-[900px]) o la opacidad. La imagen se cambia en la url() abajo. */}
+        <div 
+          className="absolute top-0 left-0 w-full h-[95vh] md:h-[900px] z-0 bg-cover bg-top bg-no-repeat"
+          style={{ backgroundImage: "url('https://aerio-three.vercel.app/bg.png')" }}
+        >
         {/* Gradient fading to pure black at the bottom to blend with the page */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/40 to-black pointer-events-none" />
       </div>
@@ -109,7 +118,8 @@ export default function LandingPage() {
       <header className="fixed top-0 left-0 right-0 z-50 p-4 md:p-6 flex justify-between items-center bg-black/20 backdrop-blur-2xl border-b border-white/5 transition-all duration-300 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
         <div className="w-full max-w-7xl mx-auto flex justify-between items-center px-2 md:px-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl overflow-hidden bg-white/5 flex items-center justify-center border border-white/10">
+            {/* [CUSTOMIZACIÓN - LOGO SUPERIOR]: Para hacerlo menos redondo cambia "rounded-[10px]" a "rounded-md" o "rounded-full". w-10 h-10 controla el tamaño. */}
+            <div className="w-10 h-10 rounded-[10px] overflow-hidden bg-white/5 flex items-center justify-center border border-white/10">
                <img src="https://aerio-three.vercel.app/aerio.png" alt="Aerio Logo" className="w-full h-full object-cover" />
             </div>
             <span className="font-medium text-xl text-white">Aerio</span>
@@ -179,11 +189,13 @@ export default function LandingPage() {
             transition={{ duration: 0.6 }} 
             className="w-full lg:w-[60%] flex flex-col items-start text-left mt-8 lg:mt-0"
           >
+            {/* [CUSTOMIZACIÓN - TITULO PRINCIPAL]: Cambia "text-5xl", "font-bold", o "text-white" para ajustar la fuente, peso y color. */}
             <h1 className="text-5xl md:text-[64px] lg:text-[72px] font-bold mb-6 tracking-tight text-white leading-[1.05]">
               Tu Mac,<br />
               más clara<br />
               y bajo control.
             </h1>
+            {/* [CUSTOMIZACIÓN - DESCRIPCION PRINCIPAL]: "text-white/60" controla el color y la opacidad. */}
             <p className="text-lg md:text-xl text-white/60 mb-10 max-w-[420px] font-medium leading-relaxed">
               Mantenimiento seguro y visual para Mac con chips M1 y posteriores.
             </p>
@@ -478,6 +490,7 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
+    </>
   );
 }
 
@@ -516,8 +529,8 @@ function MacWindow({ variant = 'purple', title = 'Terminal', lines = [] }: { var
     <motion.div 
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, ease: "easeOut" }}
-      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      viewport={{ once: false, margin: "-50px" }}
       className={cn(
         "w-full rounded-[14px] border overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative", 
         windowBg[variant]
@@ -540,7 +553,7 @@ function MacWindow({ variant = 'purple', title = 'Terminal', lines = [] }: { var
         {displayLines.map((line, i) => (
           <motion.div 
             key={i}
-            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.4 + (i * 0.4) }}
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: false }} transition={{ delay: 0.1 + (i * 0.15) }}
             className="text-white/50"
           >
             {line}
@@ -549,7 +562,7 @@ function MacWindow({ variant = 'purple', title = 'Terminal', lines = [] }: { var
         
         <div className="mt-4 space-y-3">
            <motion.div 
-             initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 1.2 + (displayLines.length * 0.4) }}
+             initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: false }} transition={{ delay: 0.2 + (displayLines.length * 0.15) }}
              className="flex justify-between text-[13px]"
            >
              <span className="text-white/50">Progress</span>
@@ -559,15 +572,15 @@ function MacWindow({ variant = 'purple', title = 'Terminal', lines = [] }: { var
              <motion.div 
                initial={{ width: 0 }} 
                whileInView={{ width: "80%" }} 
-               viewport={{ once: true }}
-               transition={{ delay: 1.2 + (displayLines.length * 0.4), duration: 1.5, ease: "easeOut" }}
+               viewport={{ once: false }}
+               transition={{ delay: 0.2 + (displayLines.length * 0.15), duration: 1, ease: "circOut" }}
                className={cn("h-full rounded-full bg-gradient-to-r", colors[variant])} 
              />
            </div>
         </div>
 
         <motion.div 
-          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 2.5 + (displayLines.length * 0.4) }}
+          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: false }} transition={{ delay: 1 + (displayLines.length * 0.15) }}
           className="mt-auto flex items-center gap-3 font-medium"
         >
            <div className={cn("w-2 h-2 rounded-full", colors[variant].split(' ')[0].replace('from-', 'bg-'))} />
