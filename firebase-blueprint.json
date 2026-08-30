@@ -1,0 +1,21 @@
+{
+  "collections": [
+    {
+      "name": "visits",
+      "description": "Logs every visit to the landing page.",
+      "schema": {
+        "ip": "string (The IP address of the visitor)",
+        "timestamp": "timestamp (When the visit occurred)",
+        "userAgent": "string (Browser/OS information)"
+      }
+    },
+    {
+      "name": "downloads",
+      "description": "Logs every time the download button is clicked.",
+      "schema": {
+        "ip": "string (The IP address of the visitor who downloaded)",
+        "timestamp": "timestamp (When the download occurred)"
+      }
+    }
+  ]
+}

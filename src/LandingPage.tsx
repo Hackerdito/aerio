@@ -1,15 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Download, Shield, Database, Apple, Cpu, Coffee, History, CheckCircle2, Trash2, Layers, Terminal, Zap, Globe, FileSearch, Info, Lock, ArrowRight } from 'lucide-react';
+import { Download, Shield, Database, Apple, Cpu, Coffee, History, CheckCircle2, Trash2, Layers, Terminal, Zap, Globe, FileSearch, Info, Lock, ArrowRight, Bell } from 'lucide-react';
 import { cn } from './lib/utils';
+import { db } from './lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function LandingPage() {
   const [downloading, setDownloading] = useState(false);
   const [showAllVersions, setShowAllVersions] = useState(false);
+  const [userIp, setUserIp] = useState<string>('unknown');
 
-  const handleDownload = (e: React.MouseEvent) => {
+  useEffect(() => {
+    // Record visit
+    const recordVisit = async () => {
+      try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        setUserIp(data.ip);
+
+        // Only log once per session to avoid spamming database in dev
+        if (!sessionStorage.getItem('visitLogged')) {
+          await addDoc(collection(db, 'visits'), {
+            ip: data.ip,
+            timestamp: serverTimestamp(),
+            userAgent: navigator.userAgent
+          });
+          sessionStorage.setItem('visitLogged', 'true');
+        }
+      } catch (error) {
+        console.error("Error logging visit:", error);
+      }
+    };
+    recordVisit();
+  }, []);
+
+  const handleDownload = async (e: React.MouseEvent) => {
     e.preventDefault();
     setDownloading(true);
+
+    try {
+      await addDoc(collection(db, 'downloads'), {
+        ip: userIp,
+        timestamp: serverTimestamp()
+      });
+    } catch (error) {
+      console.error("Error logging download:", error);
+    }
+
     const link = document.createElement('a');
     link.href = `https://aerio-three.vercel.app/Builds/Aerio-4.3.zip`;
     link.download = `Aerio-4.3.zip`;
@@ -20,7 +57,7 @@ export default function LandingPage() {
   };
 
   const versionHistory = [
-    { version: "4.3 — Actual", features: ["Nuevo sitio oficial: aerio.website.", "Nueva campana en la barra superior.", "Al pulsar la notificación abre la sección Actualizaciones"] },
+    { version: "4.3 — Actual", features: ["Nuevo sitio oficial: aerio.website.", "Nueva campana en la barra superior.", "Al pulsar la notificación abre la sección Actualizaciones."] },
     { version: "4.2", features: ["DNS ahora aparece debajo de Probar velocidad, ocupando su propia fila.", "Al escanear aplicaciones aparece una lupa orbitando con indicador de progreso.", "Al buscar archivos grandes aparece su propia animación.", "Al buscar actualizaciones aparece un indicador animado dentro del círculo.", "Cada animación funciona únicamente durante su operación.", "Historial de Créditos actualizado.", "Icono oficial conservado."] },
     { version: "3.9", features: ["Sincronización automática del número de versión en toda la interfaz.", "Versión correcta en el menú lateral, Inicio, barra superior, terminal y Créditos.", "Preparación del sistema de actualizaciones para futuras versiones."] },
     { version: "3.8", features: ["Créditos simplificados para mostrar únicamente el número de versión.", "Espacio libre del disco visible en verde desde el panel principal.", "Conservación del icono oficial de Aerio."] },
@@ -77,16 +114,29 @@ export default function LandingPage() {
             <span className="font-medium text-xl text-white">Aerio</span>
           </div>
 
-          <a 
-            href="https://ko-fi.com/hackerdito" 
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2 px-4 md:px-5 py-2.5 rounded-full border border-white/20 hover:bg-white/10 transition-all backdrop-blur-md text-white text-sm font-medium"
-          >
-            <Coffee className="w-4 h-4 text-yellow-500" />
-            <span className="hidden sm:inline">Invítame un café</span>
-            <span className="sm:hidden">Apoyar</span>
-          </a>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => {
+                document.getElementById('historial')?.scrollIntoView({ behavior: 'smooth' });
+                setShowAllVersions(true);
+              }}
+              className="relative p-2.5 rounded-full border border-white/20 hover:bg-white/10 transition-all backdrop-blur-md text-white"
+              title="Actualizaciones"
+            >
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#09070f]"></span>
+            </button>
+            <a 
+              href="https://ko-fi.com/hackerdito" 
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 px-4 md:px-5 py-2.5 rounded-full border border-white/20 hover:bg-white/10 transition-all backdrop-blur-md text-white text-sm font-medium"
+            >
+              <Coffee className="w-4 h-4 text-yellow-500" />
+              <span className="hidden sm:inline">Invítame un café</span>
+              <span className="sm:hidden">Apoyar</span>
+            </a>
+          </div>
         </div>
       </header>
 

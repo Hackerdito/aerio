@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Function to check if the user is the owner/admin
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'gerito.diseno@gmail.com';
+    }
+
+    // Anyone can log a visit, but only the admin can read/manage them
+    match /visits/{visitId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Anyone can log a download, but only the admin can read/manage them
+    match /downloads/{downloadId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}
