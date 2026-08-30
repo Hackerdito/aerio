@@ -8,6 +8,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 export default function LandingPage() {
   const [downloading, setDownloading] = useState(false);
   const [showAllVersions, setShowAllVersions] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
   const [userIp, setUserIp] = useState<string>('unknown');
 
   useEffect(() => {
@@ -115,17 +116,44 @@ export default function LandingPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <button 
-              onClick={() => {
-                document.getElementById('historial')?.scrollIntoView({ behavior: 'smooth' });
-                setShowAllVersions(true);
-              }}
-              className="relative p-2.5 rounded-full border border-white/20 hover:bg-white/10 transition-all backdrop-blur-md text-white"
-              title="Actualizaciones"
-            >
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#09070f]"></span>
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setShowNotification(!showNotification)}
+                className="relative p-2.5 rounded-full border border-white/20 hover:bg-white/10 transition-all backdrop-blur-md text-white"
+                title="Actualizaciones"
+              >
+                <Bell className="w-5 h-5" />
+                <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#09070f]"></span>
+              </button>
+
+              <AnimatePresence>
+                {showNotification && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute top-full right-0 mt-3 w-80 bg-[#130b1c]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-5 z-50 origin-top-right"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold text-white">Novedades</h3>
+                      <span className="text-xs font-medium px-2.5 py-1 bg-[#ff007f]/20 text-[#ff007f] rounded-full border border-[#ff007f]/30">
+                        {versionHistory[0].version}
+                      </span>
+                    </div>
+                    <ul className="space-y-3">
+                      {versionHistory[0].features.map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm text-white/70">
+                          <CheckCircle2 className="w-4 h-4 text-[#ff007f] shrink-0 mt-0.5" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            
             <a 
               href="https://ko-fi.com/hackerdito" 
               target="_blank"
