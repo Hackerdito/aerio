@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { Download, Shield, Database, Apple, Cpu, Coffee, History, CheckCircle2, Trash2, Layers, Terminal, Zap, Globe, FileSearch, Info, Lock } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Download, Shield, Database, Apple, Cpu, Coffee, History, CheckCircle2, Trash2, Layers, Terminal, Zap, Globe, FileSearch, Info, Lock, ArrowRight } from 'lucide-react';
 import { cn } from './lib/utils';
 
 export default function LandingPage() {
   const [downloading, setDownloading] = useState(false);
   const [showAllVersions, setShowAllVersions] = useState(false);
 
-  const handleDownload = () => {
+  const handleDownload = (e: React.MouseEvent) => {
+    e.preventDefault();
     setDownloading(true);
     const link = document.createElement('a');
     link.href = `https://aerio-three.vercel.app/Builds/Aerio-4.2.zip`;
@@ -45,138 +46,212 @@ export default function LandingPage() {
   ];
 
   const screenshots = [
-    "Panel principal", "Limpieza de cachés", "Archivos grandes", 
-    "Internet y DNS", "Actualizaciones", "Terminal visual"
+    "https://aerio-three.vercel.app/img/1.png",
+    "https://aerio-three.vercel.app/img/2.png", 
+    "https://aerio-three.vercel.app/img/3.png",
+    "https://aerio-three.vercel.app/img/4.png", 
+    "https://aerio-three.vercel.app/img/5.png", 
+    "https://aerio-three.vercel.app/img/6.png"
   ];
 
   return (
-    <div className="min-h-screen bg-[#09070f] text-white selection:bg-purple-500/30 font-sans pb-12 overflow-x-hidden relative">
+    <div className="min-h-screen bg-black text-white selection:bg-purple-500/30 font-sans pb-12 overflow-x-hidden relative">
       
-      {/* Background Ambient Glows */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[500px] bg-gradient-to-b from-purple-900/20 via-blue-900/10 to-transparent blur-3xl -z-10 pointer-events-none" />
-      <div className="absolute top-[40%] left-[-10%] w-[400px] h-[400px] bg-pink-900/10 blur-[100px] -z-10 pointer-events-none rounded-full" />
-      <div className="absolute bottom-[20%] right-[-10%] w-[500px] h-[500px] bg-blue-900/10 blur-[120px] -z-10 pointer-events-none rounded-full" />
+      {/* Static Background Image */}
+      <div 
+        className="absolute top-0 left-0 w-full h-[95vh] md:h-[900px] z-0 bg-cover bg-top bg-no-repeat"
+        style={{ backgroundImage: "url('https://aerio-three.vercel.app/bg.png')" }}
+      >
+        {/* Gradient fading to pure black at the bottom to blend with the page */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/40 to-black pointer-events-none" />
+      </div>
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 p-4 flex justify-between items-center bg-[#09070f]/40 backdrop-blur-xl border-b border-white/5 transition-all duration-300">
-        <div className="max-w-7xl mx-auto w-full flex justify-between items-center px-2">
+      <header className="fixed top-0 left-0 right-0 z-50 p-4 md:p-6 flex justify-between items-center bg-black/20 backdrop-blur-2xl border-b border-white/5 transition-all duration-300 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+        <div className="w-full max-w-7xl mx-auto flex justify-between items-center px-2 md:px-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-lg shadow-purple-500/20 bg-white/5 border border-white/10 p-0.5 backdrop-blur-md">
-               <img src="https://aerio-three.vercel.app/aerio.png" alt="Aerio Logo" className="w-full h-full object-cover rounded-[14px]" />
+            <div className="w-10 h-10 rounded-2xl overflow-hidden bg-white/5 flex items-center justify-center border border-white/10">
+               <img src="https://aerio-three.vercel.app/aerio.png" alt="Aerio Logo" className="w-full h-full object-cover" />
             </div>
-            <span className="font-bold text-xl tracking-wide text-white/90">Aerio</span>
+            <span className="font-medium text-xl text-white">Aerio</span>
           </div>
+
           <a 
             href="https://ko-fi.com/hackerdito" 
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium text-sm transition-all hover:scale-105 active:scale-95 backdrop-blur-md shadow-xl"
+            className="flex items-center gap-2 px-4 md:px-5 py-2.5 rounded-full border border-white/20 hover:bg-white/10 transition-all backdrop-blur-md text-white text-sm font-medium"
           >
-            <Coffee className="w-4 h-4 text-[#FFDD00]" />
+            <Coffee className="w-4 h-4 text-yellow-500" />
             <span className="hidden sm:inline">Invítame un café</span>
+            <span className="sm:hidden">Apoyar</span>
           </a>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-44 pb-20 flex flex-col items-center justify-center text-center px-6">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: 0.6 }} 
-          className="max-w-4xl mx-auto flex flex-col items-center"
-        >
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-white/70 leading-[1.1]">
-            Tu Mac, más clara <br className="hidden md:block"/>y bajo control.
-          </h1>
-          <p className="text-xl text-white/60 mb-10 max-w-2xl font-medium leading-relaxed">
-            Mantenimiento seguro y visual para Mac con chips M1 y posteriores.
-          </p>
-
-          <button 
-            onClick={handleDownload} 
-            disabled={downloading} 
-            className="relative group overflow-hidden rounded-full p-[1px] mb-8 transition-transform hover:scale-105 active:scale-95 shadow-2xl shadow-purple-500/20"
+      <section className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-36 md:pt-48 pb-12">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">
+          
+          {/* Left Column - Text & Buttons */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 0.6 }} 
+            className="w-full lg:w-[60%] flex flex-col items-start text-left mt-8 lg:mt-0"
           >
-            <span className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 rounded-full opacity-70 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="relative px-8 py-4 bg-[#09070f]/80 backdrop-blur-md rounded-full flex items-center gap-3">
-              {downloading ? (
-                <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-              ) : (
-                <Download className="w-5 h-5 text-white" />
-              )}
-              <span className="font-bold text-lg text-white">Descargar Aerio 4.2</span>
+            <h1 className="text-5xl md:text-[64px] lg:text-[72px] font-bold mb-6 tracking-tight text-white leading-[1.05]">
+              Tu Mac,<br />
+              más clara<br />
+              y bajo control.
+            </h1>
+            <p className="text-lg md:text-xl text-white/60 mb-10 max-w-[420px] font-medium leading-relaxed">
+              Mantenimiento seguro y visual para Mac con chips M1 y posteriores.
+            </p>
+
+            <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-4">
+              <motion.button 
+                type="button"
+                onClick={handleDownload}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.94 }}
+                transition={{ type: "spring", stiffness: 500, damping: 25, mass: 0.8 }}
+                className={cn(
+                  "relative group px-6 py-3 md:px-8 md:py-4 rounded-[30px] flex items-center justify-center overflow-hidden shadow-lg transition-colors duration-500",
+                  downloading ? "bg-[#00ff88] text-black shadow-[#00ff88]/20 min-w-[200px]" : "bg-[#075CFF] hover:bg-blue-600 text-white shadow-blue-500/20"
+                )}
+                layout
+              >
+                {/* Subtle shine effect on hover */}
+                {!downloading && <span className="absolute inset-0 bg-white/20 translate-y-[100%] group-hover:translate-y-[0%] transition-transform duration-500 ease-out rounded-[30px] pointer-events-none" />}
+                
+                <AnimatePresence mode="wait">
+                  {downloading ? (
+                    <motion.div
+                      key="downloading"
+                      initial={{ opacity: 0, y: 15, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -15, scale: 0.9 }}
+                      transition={{ duration: 0.3 }}
+                      className="flex items-center gap-3 relative z-10"
+                    >
+                      <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 stroke-[2.5]" />
+                      <span className="font-bold text-base md:text-lg">¡Descargando!</span>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="idle"
+                      initial={{ opacity: 0, y: 15, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -15, scale: 0.9 }}
+                      transition={{ duration: 0.3 }}
+                      className="flex items-center gap-3 relative z-10"
+                    >
+                      <span className="font-medium text-base md:text-lg">Descargar Aerio 4.2</span>
+                      <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="px-4 py-2.5 md:px-5 md:py-3 rounded-full border border-white/20 text-white/90 text-xs md:text-sm font-medium flex items-center gap-2 backdrop-blur-md bg-white/5">
+                    <Apple className="w-3 h-3 md:w-4 md:h-4" /> macOS 13+
+                  </span>
+                  <span className="px-4 py-2.5 md:px-5 md:py-3 rounded-full border border-white/20 text-white/90 text-xs md:text-sm font-medium flex items-center gap-2 backdrop-blur-md bg-white/5">
+                    <Cpu className="w-3 h-3 md:w-4 md:h-4" /> Apple Silicon
+                  </span>
+                  
+                  {/* Intel Beta Badge */}
+                  <div className="relative group">
+                    <span className="px-4 py-2.5 md:px-5 md:py-3 rounded-full border border-[#f5a623]/30 text-[#f5a623] text-xs md:text-sm font-medium flex items-center gap-2 backdrop-blur-md bg-[#f5a623]/5 cursor-default transition-colors group-hover:bg-[#f5a623]/10">
+                      <Cpu className="w-3 h-3 md:w-4 md:h-4" /> Intel (Beta)
+                    </span>
+                    {/* Tooltip */}
+                    <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-48 opacity-0 group-hover:opacity-100 transition-opacity bg-[#1a1a1a] border border-white/10 text-xs text-white/80 rounded-lg p-3 pointer-events-none text-center shadow-xl z-50">
+                      <div className="font-semibold text-white mb-1">En desarrollo</div>
+                      Soporte beta funcional. ¡Próximamente 100% estable!
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </button>
 
-          <div className="flex flex-wrap justify-center gap-3 text-sm font-semibold">
-            <span className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 flex items-center gap-2"><Apple className="w-4 h-4"/> macOS 13+</span>
-            <span className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 flex items-center gap-2"><Cpu className="w-4 h-4"/> Apple Silicon</span>
-            <span className="px-4 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400">Descarga gratuita</span>
-          </div>
-        </motion.div>
-      </section>
 
-      {/* Main Concept */}
-      <section className="py-12 px-6 max-w-4xl mx-auto text-center border-b border-white/5 pb-20">
-        <h2 className="text-2xl md:text-3xl font-bold mb-6 text-white/90">Aerio: conoce, limpia y organiza tu Mac desde un solo lugar.</h2>
-        <p className="text-lg text-white/50 leading-relaxed font-medium">
-          Aerio analiza cachés de usuario, permite revisar archivos grandes y antiguos, facilita la desinstalación de aplicaciones, 
-          administra la Papelera y muestra información de RAM, almacenamiento y conexión a Internet. Antes de borrar, 
-          enseña lo encontrado y mantiene protegidos los documentos, preferencias y datos importantes.
-        </p>
+          </motion.div>
+        </div>
       </section>
 
       {/* Real Features - Apple Style */}
-      <section className="py-24 px-6 max-w-7xl mx-auto space-y-32">
-        <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">Diseñado para macOS.</h2>
-          <p className="text-xl text-white/50 max-w-2xl mx-auto">Funciones potentes con una interfaz nativa y elegante que se integra perfectamente en tu ecosistema Apple.</p>
-        </div>
-
+      <section className="relative z-10 py-12 md:py-20 px-6 max-w-7xl mx-auto space-y-24 md:space-y-32">
         {/* Feature 1 */}
-        <div className="flex flex-col md:flex-row items-center gap-16">
-          <div className="w-full md:w-1/2">
-            <MacWindow variant="purple" title="aerio-cleaner" />
+        <div className="flex flex-col md:flex-row items-center gap-16 md:gap-24">
+          <div className="w-full md:w-[55%]">
+            <MacWindow 
+              variant="purple" 
+              title="aerio-cleaner" 
+              lines={[
+                "Scanning user caches...",
+                "Detecting application containers...",
+                "Analyzing Adobe remnants..."
+              ]}
+            />
           </div>
-          <div className="w-full md:w-1/2 flex flex-col items-start text-left">
-            <div className="w-12 h-12 bg-purple-500/20 rounded-2xl flex items-center justify-center mb-6 border border-purple-500/30">
-              <Layers className="w-6 h-6 text-purple-400" />
+          <div className="w-full md:w-[45%] flex flex-col items-start text-left">
+            <div className="w-14 h-14 bg-transparent rounded-[20px] flex items-center justify-center mb-6 border border-[#b77cfc]/30 shadow-[0_0_15px_rgba(183,124,252,0.1)]">
+              <Layers className="w-6 h-6 text-[#b77cfc]" strokeWidth={1.5} />
             </div>
-            <h3 className="text-3xl font-bold mb-4 text-white/90">Limpieza profunda de cachés</h3>
-            <p className="text-lg text-white/50 leading-relaxed">
+            <h3 className="text-3xl md:text-4xl font-bold mb-4 text-white tracking-tight">Limpieza profunda de cachés</h3>
+            <p className="text-lg text-[#a1a1aa] leading-relaxed font-medium">
               Limpieza segura de cachés de usuario, con detección especial de cachés de aplicaciones, contenedores y Adobe. Todo el control en una terminal visual.
             </p>
           </div>
         </div>
 
         {/* Feature 2 */}
-        <div className="flex flex-col md:flex-row-reverse items-center gap-16">
-          <div className="w-full md:w-1/2">
-            <MacWindow variant="blue" title="file-scanner" />
+        <div className="flex flex-col md:flex-row-reverse items-center gap-16 md:gap-24">
+          <div className="w-full md:w-[55%]">
+            <MacWindow 
+              variant="blue" 
+              title="file-scanner" 
+              lines={[
+                "Analyzing disk usage...",
+                "Locating large files...",
+                "Identifying old archives..."
+              ]}
+            />
           </div>
-          <div className="w-full md:w-1/2 flex flex-col items-start text-left">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-6 border border-blue-500/30">
-              <FileSearch className="w-6 h-6 text-blue-400" />
+          <div className="w-full md:w-[45%] flex flex-col items-start text-left">
+            <div className="w-14 h-14 bg-transparent rounded-[20px] flex items-center justify-center mb-6 border border-[#5e9fff]/30 shadow-[0_0_15px_rgba(94,159,255,0.1)]">
+              <FileSearch className="w-6 h-6 text-[#5e9fff]" strokeWidth={1.5} />
             </div>
-            <h3 className="text-3xl font-bold mb-4 text-white/90">Revisión de archivos</h3>
-            <p className="text-lg text-white/50 leading-relaxed">
+            <h3 className="text-3xl md:text-4xl font-bold mb-4 text-white tracking-tight">Revisión de archivos</h3>
+            <p className="text-lg text-[#a1a1aa] leading-relaxed font-medium">
               Análisis y revisión de archivos grandes y antiguos antes de moverlos o eliminarlos. Mantén tu almacenamiento optimizado sin perder archivos importantes.
             </p>
           </div>
         </div>
 
         {/* Feature 3 */}
-        <div className="flex flex-col md:flex-row items-center gap-16">
-          <div className="w-full md:w-1/2">
-            <MacWindow variant="green" title="system-monitor" />
+        <div className="flex flex-col md:flex-row items-center gap-16 md:gap-24">
+          <div className="w-full md:w-[55%]">
+            <MacWindow 
+              variant="green" 
+              title="system-monitor" 
+              lines={[
+                "Analyzing RAM allocation...",
+                "Checking disk health...",
+                "Monitoring network status..."
+              ]}
+            />
           </div>
-          <div className="w-full md:w-1/2 flex flex-col items-start text-left">
-            <div className="w-12 h-12 bg-green-500/20 rounded-2xl flex items-center justify-center mb-6 border border-green-500/30">
-              <Database className="w-6 h-6 text-green-400" />
+          <div className="w-full md:w-[45%] flex flex-col items-start text-left">
+            <div className="w-14 h-14 bg-transparent rounded-[20px] flex items-center justify-center mb-6 border border-[#4ade80]/30 shadow-[0_0_15px_rgba(74,222,128,0.1)]">
+              <Database className="w-6 h-6 text-[#4ade80]" strokeWidth={1.5} />
             </div>
-            <h3 className="text-3xl font-bold mb-4 text-white/90">Estado del sistema en vivo</h3>
-            <p className="text-lg text-white/50 leading-relaxed">
+            <h3 className="text-3xl md:text-4xl font-bold mb-4 text-white tracking-tight">Estado del sistema en vivo</h3>
+            <p className="text-lg text-[#a1a1aa] leading-relaxed font-medium">
               Información detallada de la memoria RAM, estado del disco y el espacio disponible en tiempo real, presentado de forma impecable.
             </p>
           </div>
@@ -203,7 +278,7 @@ export default function LandingPage() {
       </section>
 
       {/* Security & Protection */}
-      <section className="py-24 px-6 relative">
+      <section className="relative z-10 py-24 px-6">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/10 blur-[120px] -z-10 rounded-full pointer-events-none" />
         <div className="max-w-4xl mx-auto bg-white/[0.02] border border-white/10 p-10 md:p-16 rounded-[3rem] text-center shadow-2xl backdrop-blur-3xl hover:bg-white/[0.04] transition-all duration-500">
           <div className="w-20 h-20 bg-purple-500/10 border border-purple-500/20 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner">
@@ -218,7 +293,7 @@ export default function LandingPage() {
       </section>
 
       {/* Compatibility */}
-      <section className="py-24 px-6 max-w-4xl mx-auto text-center border-t border-white/5">
+      <section className="relative z-10 py-24 px-6 max-w-4xl mx-auto text-center border-t border-white/5">
         <h2 className="text-3xl md:text-4xl font-bold mb-12 flex items-center justify-center gap-4 tracking-tight">
           <Cpu className="w-10 h-10 text-white/80" />
           Compatibilidad Exclusiva
@@ -247,18 +322,18 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Capturas Reales (Placeholders for user to replace) */}
-      <section className="py-24 px-6 max-w-7xl mx-auto">
+      {/* Capturas Reales */}
+      <section className="relative z-10 py-24 px-6 max-w-7xl mx-auto">
         <h2 className="text-3xl font-bold text-center mb-16">Capturas auténticas de Aerio</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {screenshots.map((shot, idx) => (
-            <div key={idx} className="group relative aspect-[4/3] bg-white/[0.02] border border-white/10 rounded-3xl overflow-hidden flex flex-col items-center justify-center p-6 text-center hover:bg-white/[0.05] hover:border-white/20 transition-all duration-500 backdrop-blur-xl shadow-xl">
-              {/* Note for developer: Replace this div with an actual <img src="/tu-captura.png" /> */}
-              <div className="w-16 h-16 mb-4 rounded-2xl bg-black/20 flex items-center justify-center border border-white/5 shadow-inner">
-                <Info className="w-8 h-8 text-white/30" />
-              </div>
-              <p className="font-semibold text-white/70">{shot}</p>
-              <p className="text-xs text-white/30 mt-2">(Reemplazar con imagen real)</p>
+            <div key={idx} className="group relative aspect-[4/3] bg-white/[0.02] border border-white/10 rounded-3xl overflow-hidden hover:border-white/20 transition-all duration-500 shadow-xl">
+              <img 
+                src={shot} 
+                alt={`Captura ${idx + 1}`} 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-3xl pointer-events-none" />
             </div>
           ))}
         </div>
@@ -311,12 +386,13 @@ export default function LandingPage() {
       </section>
 
       {/* Footer / Credits */}
-      <footer className="mt-20 border-t border-white/5 py-12 px-6 text-center">
-        <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-lg shadow-purple-500/20 bg-white/5 border border-white/10 p-0.5 mx-auto mb-6 opacity-80 hover:opacity-100 transition-opacity">
-           <img src="https://aerio-three.vercel.app/aerio.png" alt="Aerio Logo" className="w-full h-full object-cover rounded-[14px]" />
+      <footer className="relative z-10 mt-20 pt-16 pb-12 px-6 flex flex-col items-center text-center">
+        <div className="w-16 h-16 rounded-[1.25rem] overflow-hidden shadow-2xl shadow-black/50 bg-black border border-white/5 mx-auto mb-8 relative">
+           <div className="absolute inset-0 bg-white/5 flex items-center justify-center mix-blend-overlay" />
+           <img src="https://aerio-three.vercel.app/aerio.png" alt="Aerio Logo" className="w-full h-full object-cover scale-[0.85]" />
         </div>
-        <p className="text-white/70 mb-4 font-medium">Aerio está creado por Hackerdito.</p>
-        <div className="flex items-center justify-center gap-6 text-sm text-white/40">
+        <p className="text-white/90 text-lg md:text-xl font-bold tracking-tight mb-8">Aerio está creado por Hackerdito.</p>
+        <div className="flex items-center justify-center gap-4 text-[15px] text-white/50 font-medium">
           <a href="https://gerardodg.art" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">gerardodg.art</a>
           <span className="w-1 h-1 rounded-full bg-white/20" />
           <a href="https://aerio-three.vercel.app" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">aerio-three.vercel.app</a>
@@ -327,76 +403,97 @@ export default function LandingPage() {
 }
 
 // Reusable Mac Window Mockup
-function MacWindow({ variant = 'purple', title = 'Terminal' }: { variant?: 'purple' | 'orange' | 'pink' | 'blue' | 'green', title?: string }) {
+function MacWindow({ variant = 'purple', title = 'Terminal', lines = [] }: { variant?: 'purple' | 'orange' | 'pink' | 'blue' | 'green', title?: string, lines?: string[] }) {
+  const windowBg: Record<string, string> = {
+    purple: "bg-[#181124] border-[#b77cfc]/20",
+    blue: "bg-[#101b33] border-[#5e9fff]/20",
+    green: "bg-[#0c1f15] border-[#4ade80]/20"
+  };
+
   const colors: Record<string, string> = {
-    purple: "from-purple-500/20 to-purple-500/5 border-purple-500/30",
-    orange: "from-orange-500/20 to-orange-500/5 border-orange-500/30",
-    pink: "from-pink-500/20 to-pink-500/5 border-pink-500/30",
-    blue: "from-blue-500/20 to-blue-500/5 border-blue-500/30",
-    green: "from-green-500/20 to-green-500/5 border-green-500/30"
+    purple: "from-[#b77cfc] to-[#9333ea]",
+    blue: "from-[#5e9fff] to-[#2563eb]",
+    green: "from-[#4ade80] to-[#16a34a]"
   };
 
   const textColors: Record<string, string> = {
-    purple: "text-purple-400",
-    orange: "text-orange-400",
-    pink: "text-pink-400",
-    blue: "text-blue-400",
-    green: "text-green-400"
+    purple: "text-[#b77cfc]",
+    blue: "text-[#5e9fff]",
+    green: "text-[#4ade80]"
   };
 
-  const bgColors: Record<string, string> = {
-    purple: "bg-purple-500",
-    orange: "bg-orange-500",
-    pink: "bg-pink-500",
-    blue: "bg-blue-500",
-    green: "bg-green-500"
+  const headerColors: Record<string, string> = {
+    purple: "bg-white/[0.03] border-b border-white/[0.05]",
+    blue: "bg-white/[0.03] border-b border-white/[0.05]",
+    green: "bg-white/[0.03] border-b border-white/[0.05]"
   };
+
+  const displayLines = lines.length > 0 ? lines : [
+    "Initializing secure environment...",
+    "Scanning sectors..."
+  ];
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.5 }}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, ease: "easeOut" }}
       viewport={{ once: true, margin: "-100px" }}
       className={cn(
-        "w-full rounded-2xl border bg-gradient-to-b backdrop-blur-md overflow-hidden shadow-2xl relative", 
-        colors[variant]
+        "w-full rounded-[14px] border overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative", 
+        windowBg[variant]
       )}
     >
-      <div className="absolute inset-0 bg-white/[0.02]" />
-      <div className="h-10 border-b border-white/10 flex items-center px-4 gap-2 bg-black/40 relative z-10">
-        <div className="flex gap-2">
+      <div className={cn("h-11 flex items-center px-4 relative", headerColors[variant])}>
+        <div className="flex gap-2 absolute left-4">
           <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
           <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
           <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
         </div>
-        <div className="mx-auto text-xs font-semibold text-white/50 tracking-wider font-sans">{title}</div>
-        <div className="w-10" /> {/* Spacer for centering */}
+        <div className="w-full text-center text-[13px] font-mono text-white/40 tracking-wide">{title}</div>
       </div>
-      <div className="p-6 font-mono text-sm text-white/70 h-[300px] flex flex-col gap-3 relative z-10">
-        <div className="flex items-center gap-2"><span className="text-green-400">➜</span> <span>~/{title} --run</span></div>
-        <div className="text-white/40">Initializing secure environment...</div>
-        <div className="text-white/40">Scanning sectors...</div>
+      <div className="p-6 md:p-8 font-mono text-sm md:text-base text-white/70 h-[300px] flex flex-col gap-4">
+        <div className="flex items-center gap-3">
+          <span className="text-[#4ade80]">➜</span> 
+          <span className="text-white/90">~/{title} --run</span>
+        </div>
         
-        <div className="mt-4 space-y-4">
-          <div className="space-y-1">
-             <div className="flex justify-between text-xs"><span className="text-white/50">Progress</span><span className={textColors[variant]}>80%</span></div>
+        {displayLines.map((line, i) => (
+          <motion.div 
+            key={i}
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.4 + (i * 0.4) }}
+            className="text-white/50"
+          >
+            {line}
+          </motion.div>
+        ))}
+        
+        <div className="mt-4 space-y-3">
+           <motion.div 
+             initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 1.2 + (displayLines.length * 0.4) }}
+             className="flex justify-between text-[13px]"
+           >
+             <span className="text-white/50">Progress</span>
+             <span className={textColors[variant]}>80%</span>
+           </motion.div>
+           <div className="h-[6px] bg-white/10 rounded-full overflow-hidden">
              <motion.div 
                initial={{ width: 0 }} 
-               whileInView={{ width: "100%" }} 
+               whileInView={{ width: "80%" }} 
                viewport={{ once: true }}
-               transition={{ delay: 0.5, duration: 1.5, ease: "easeOut" }}
-               className="h-1.5 bg-white/10 rounded-full overflow-hidden"
-             >
-               <div className={cn("h-full", bgColors[variant])} style={{ width: '80%' }} />
-             </motion.div>
-          </div>
+               transition={{ delay: 1.2 + (displayLines.length * 0.4), duration: 1.5, ease: "easeOut" }}
+               className={cn("h-full rounded-full bg-gradient-to-r", colors[variant])} 
+             />
+           </div>
         </div>
 
-        <div className="mt-auto flex items-center gap-2">
-           <div className={cn("w-2 h-2 rounded-full animate-pulse", bgColors[variant])} />
+        <motion.div 
+          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 2.5 + (displayLines.length * 0.4) }}
+          className="mt-auto flex items-center gap-3 font-medium"
+        >
+           <div className={cn("w-2 h-2 rounded-full", colors[variant].split(' ')[0].replace('from-', 'bg-'))} />
            <span className={textColors[variant]}>System Optimized</span>
-        </div>
+        </motion.div>
       </div>
     </motion.div>
   );
