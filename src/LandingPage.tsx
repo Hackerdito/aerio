@@ -148,7 +148,7 @@ export default function LandingPage() {
                       transition={{ duration: 0.3 }}
                       className="flex items-center gap-3 relative z-10"
                     >
-                      <span className="font-medium text-base md:text-lg">Descargar Aerio 4.2</span>
+                      <span className="font-medium text-base md:text-lg">Descargar Aerio 4.3</span>
                       <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1" />
                     </motion.div>
                   )}
