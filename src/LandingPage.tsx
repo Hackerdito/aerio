@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Download, Shield, Database, Apple, Cpu, Coffee, History, CheckCircle2, Trash2, Layers, Terminal, Zap, Globe, FileSearch, Info, Lock, ArrowRight, Bell } from 'lucide-react';
+import { Download, Shield, Database, Apple, Cpu, Coffee, History, CheckCircle2, Layers, Terminal, Zap, Globe, FileSearch, Info, Lock, ArrowRight, Bell, MessageSquare, Star, MessageCircle, Trash2 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { db } from './lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, onSnapshot } from 'firebase/firestore';
+import { Link } from 'react-router-dom';
 
 export default function LandingPage() {
   const [downloading, setDownloading] = useState(false);
@@ -11,6 +12,7 @@ export default function LandingPage() {
   const [showNotification, setShowNotification] = useState(false);
   const [userIp, setUserIp] = useState<string>('unknown');
   const [userGeo, setUserGeo] = useState<{country?: string, city?: string}>({});
+  const [testimonials, setTestimonials] = useState<any[]>([]);
 
   useEffect(() => {
     // Record visit
@@ -37,6 +39,21 @@ export default function LandingPage() {
       }
     };
     recordVisit();
+
+    // Fetch all testimonials
+    const qFeedback = query(collection(db, 'feedback'));
+    const unsubFeedback = onSnapshot(qFeedback, (snapshot) => {
+      const allFeedbacks = snapshot.docs.map(document => ({ id: document.id, ...document.data() }));
+      // Sort in client
+      allFeedbacks.sort((a: any, b: any) => {
+        const timeA = a.createdAt?.toMillis() || 0;
+        const timeB = b.createdAt?.toMillis() || 0;
+        return timeB - timeA;
+      });
+      setTestimonials(allFeedbacks);
+    });
+
+    return () => unsubFeedback();
   }, []);
 
   const handleDownload = async (e: React.MouseEvent) => {
@@ -55,7 +72,7 @@ export default function LandingPage() {
     }
 
     const link = document.createElement('a');
-    link.href = `https://aerio-three.vercel.app/Builds/Aerio-4.3.zip`;
+    link.href = `https://aerio-three.vercel.app/Builds/Aerio-4.4.zip`;
     link.download = `Aerio-4.4.zip`;
     document.body.appendChild(link);
     link.click();
@@ -64,7 +81,7 @@ export default function LandingPage() {
   };
 
   const versionHistory = [
-    { version: "4.4 — Actual", features: ["Análisis inteligente con datos reales del Mac.", "Revisión y selección antes de limpiar.", "Desinstalador con revisión conservadora de archivos relacionados."] },
+    { version: "4.4 — Actual", features: ["Análisis inteligente con datos reales del Mac.", "Cachés separadas por usuario, aplicaciones, navegadores y temporales seguros.", "Revisión y selección antes de limpiar.", "Filtros para archivos de +500 MB, +1 GB, +5 GB y +10 GB.", "Ruta, tipo, fecha y botón “Mostrar en Finder”.", "Desinstalador con revisión conservadora de archivos relacionados."] },
     { version: "4.3", features: ["Nuevo sitio oficial: aerio.website.", "Nueva campana en la barra superior.", "Al pulsar la notificación abre la sección Actualizaciones."] },
     { version: "4.2", features: ["DNS ahora aparece debajo de Probar velocidad, ocupando su propia fila.", "Al escanear aplicaciones aparece una lupa orbitando con indicador de progreso.", "Al buscar archivos grandes aparece su propia animación.", "Al buscar actualizaciones aparece un indicador animado dentro del círculo.", "Cada animación funciona únicamente durante su operación.", "Historial de Créditos actualizado.", "Icono oficial conservado."] },
     { version: "3.9", features: ["Sincronización automática del número de versión en toda la interfaz.", "Versión correcta en el menú lateral, Inicio, barra superior, terminal y Créditos.", "Preparación del sistema de actualizaciones para futuras versiones."] },
@@ -431,6 +448,80 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Testimonials */}
+      {testimonials.length > 0 && (
+        <section className="relative z-10 py-24 w-full border-t border-white/5 overflow-hidden">
+          <div className="max-w-7xl mx-auto px-6 mb-12">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-8 h-[2px] bg-[#ff007f]"></div>
+              <span className="text-[#ff007f] font-bold text-sm tracking-wider uppercase">Lo que dice la comunidad</span>
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold text-white max-w-2xl leading-tight">
+              Experiencias de usuarios con Aerio
+            </h2>
+          </div>
+          
+          <div className="flex gap-6 overflow-x-auto snap-x snap-mandatory px-6 md:px-12 pb-8 custom-scrollbar">
+            {testimonials.map((testimonio) => {
+              const date = testimonio.createdAt ? testimonio.createdAt.toDate() : new Date();
+              const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+              let timeAgo = "Hace un momento";
+              let interval = seconds / 31536000;
+              if (interval > 1) timeAgo = `Hace ${Math.floor(interval)} años`;
+              else {
+                interval = seconds / 2592000;
+                if (interval > 1) timeAgo = `Hace ${Math.floor(interval)} meses`;
+                else {
+                  interval = seconds / 86400;
+                  if (interval > 1) timeAgo = `Hace ${Math.floor(interval)} días`;
+                  else {
+                    interval = seconds / 3600;
+                    if (interval > 1) timeAgo = `Hace ${Math.floor(interval)} horas`;
+                    else {
+                      interval = seconds / 60;
+                      if (interval > 1) timeAgo = `Hace ${Math.floor(interval)} minutos`;
+                    }
+                  }
+                }
+              }
+              const name = testimonio.name || 'Anónimo';
+              const initial = name.charAt(0).toUpperCase();
+              
+              return (
+                <div key={testimonio.id} className="min-w-[320px] md:min-w-[420px] max-w-[420px] bg-white/[0.03] border border-white/10 p-6 md:p-8 rounded-[32px] snap-center flex flex-col justify-between hover:bg-white/[0.05] transition-colors relative group">
+                  <div>
+                    <div className="flex items-center gap-4 mb-5">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xl font-bold text-white shrink-0">
+                        {initial}
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-white/90 text-lg">{name}</h4>
+                        <p className="text-sm text-blue-400 font-medium">{timeAgo}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-1 mb-5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={cn("w-4 h-4", i < (testimonio.rating || 5) ? "text-yellow-400 fill-yellow-400" : "text-white/10")} />
+                      ))}
+                    </div>
+                    <p className="text-white/80 leading-relaxed mb-6 text-[15px]">"{testimonio.message}"</p>
+                  </div>
+                  
+                  <div className="flex items-center justify-between border-t border-white/10 pt-5 mt-auto">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                      <span className="text-xs font-semibold text-white/40 tracking-wider">VERIFIED REVIEW</span>
+                    </div>
+                    {testimonio.macModel && <span className="text-xs text-white/40">{testimonio.macModel}</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {/* Version History */}
       <section className="py-24 px-6 max-w-4xl mx-auto border-t border-white/5">
         <div className="mb-16">
@@ -490,6 +581,19 @@ export default function LandingPage() {
           <a href="https://aerio-three.vercel.app" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">aerio-three.vercel.app</a>
         </div>
       </footer>
+
+      {/* Floating Feedback Button */}
+      <Link 
+        to="/feedback"
+        className="fixed bottom-6 right-6 z-50 flex items-center h-[52px] w-[52px] group-hover:w-[200px] hover:w-[200px] rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/20 shadow-2xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-95 group text-white font-medium overflow-hidden"
+      >
+        <div className="flex items-center justify-center w-[52px] h-[52px] shrink-0">
+          <MessageSquare className="w-5 h-5" />
+        </div>
+        <span className="whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100 pr-4">
+          Dejar comentario
+        </span>
+      </Link>
     </div>
     </>
   );

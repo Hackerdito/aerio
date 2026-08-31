@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
-import { Download, Users, ArrowUpRight, Clock, Shield, LogOut, ChevronDown, ChevronUp, Globe2, Monitor } from 'lucide-react';
+import { Download, Users, ArrowUpRight, Clock, Shield, LogOut, ChevronDown, ChevronUp, Globe2, Monitor, MessageSquare, Star, CheckCircle2, AlertCircle, Eye, EyeOff, Trash2 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { db, auth, logout } from './lib/firebase';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,6 +15,7 @@ export default function Dashboard() {
   const [totalVisits, setTotalVisits] = useState(0);
   const [allVisits, setAllVisits] = useState<any[]>([]);
   const [allDownloads, setAllDownloads] = useState<any[]>([]);
+  const [allFeedback, setAllFeedback] = useState<any[]>([]);
   const [expandedIp, setExpandedIp] = useState<string | null>(null);
 
   useEffect(() => {
@@ -40,9 +41,16 @@ export default function Dashboard() {
       setAllVisits(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
 
+    // Listen to all feedback
+    const qFeedback = query(collection(db, 'feedback'), orderBy('createdAt', 'desc'));
+    const unsubFeedback = onSnapshot(qFeedback, (snapshot) => {
+      setAllFeedback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
     return () => {
       unsubDownloads();
       unsubVisitsAll();
+      unsubFeedback();
     };
   }, [user]);
 
@@ -216,6 +224,127 @@ export default function Dashboard() {
               })}
               {groupedTraffic.length === 0 && (
                 <div className="text-center text-white/50 py-10">No hay tráfico registrado aún.</div>
+              )}
+            </div>
+          </div>
+          
+          {/* Feedback Section */}
+          <div className="bg-[#130b1c] border border-white/5 rounded-2xl p-6 overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold shrink-0 flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-white/50" />
+                Comentarios ({allFeedback.length})
+              </h2>
+            </div>
+            
+            <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar max-h-[600px]">
+              {allFeedback.map((feedback) => (
+                <div key={feedback.id} className="bg-white/[0.02] border border-white/5 rounded-xl p-5 hover:bg-white/[0.04] transition-colors">
+                  <div className="flex flex-col md:flex-row justify-between gap-4 mb-4">
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className={cn(
+                          "px-2.5 py-1 rounded-full text-xs font-medium border",
+                          feedback.type === 'bug' ? "bg-red-500/10 text-red-400 border-red-500/20" :
+                          feedback.type === 'problem' ? "bg-orange-500/10 text-orange-400 border-orange-500/20" :
+                          feedback.type === 'suggestion' ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20" :
+                          feedback.type === 'feature' ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
+                          "bg-pink-500/10 text-pink-400 border-pink-500/20"
+                        )}>
+                          {feedback.type === 'bug' ? 'Error' : 
+                           feedback.type === 'problem' ? 'Problema' : 
+                           feedback.type === 'suggestion' ? 'Sugerencia' : 
+                           feedback.type === 'feature' ? 'Nueva función' : 'Me gusta'}
+                        </span>
+                        
+                        <span className="text-sm font-medium text-white/90">
+                          {feedback.name || 'Anónimo'}
+                        </span>
+                        
+                        {feedback.email && (
+                          <span className="text-xs text-white/40">({feedback.email})</span>
+                        )}
+                      </div>
+                      
+                      {feedback.rating > 0 && (
+                        <div className="flex items-center gap-1 mb-2">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={cn("w-3.5 h-3.5", i < feedback.rating ? "text-yellow-400 fill-yellow-400" : "text-white/10")} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                      <div className="flex items-center gap-2">
+                        <select 
+                          value={feedback.status || 'new'}
+                          onChange={(e) => updateDoc(doc(db, 'feedback', feedback.id), { status: e.target.value })}
+                          className={cn(
+                            "text-xs px-2 py-1 rounded-md border bg-black outline-none focus:ring-1",
+                            feedback.status === 'new' ? "text-white/90 border-white/20" :
+                            feedback.status === 'reviewing' ? "text-yellow-400 border-yellow-400/30" :
+                            feedback.status === 'resolved' ? "text-green-400 border-green-400/30" :
+                            "text-white/40 border-white/10"
+                          )}
+                        >
+                          <option value="new">Nuevo</option>
+                          <option value="reviewing">Revisando</option>
+                          <option value="resolved">Resuelto</option>
+                          <option value="ignored">Ignorado</option>
+                        </select>
+                        
+                        <button
+                          onClick={() => updateDoc(doc(db, 'feedback', feedback.id), { public: !feedback.public })}
+                          title={feedback.public ? "Quitar de la web" : "Publicar en la web"}
+                          className={cn(
+                            "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border transition-colors",
+                            feedback.public 
+                              ? "bg-[#ff007f]/10 text-[#ff007f] border-[#ff007f]/30 hover:bg-[#ff007f]/20" 
+                              : "bg-white/5 text-white/40 border-white/10 hover:bg-white/10 hover:text-white/80"
+                          )}
+                        >
+                          {feedback.public ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                          {feedback.public ? "Público" : "Privado"}
+                        </button>
+
+                        <button
+                          onClick={async () => {
+                            if(window.confirm('¿Eliminar este comentario permanentemente?')) {
+                              try {
+                                await deleteDoc(doc(db, 'feedback', feedback.id));
+                              } catch (err: any) {
+                                alert("Error al eliminar: " + err.message);
+                              }
+                            }
+                          }}
+                          title="Eliminar comentario"
+                          className="flex items-center justify-center w-7 h-7 rounded-md bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors shrink-0"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      
+                      <span className="text-[11px] text-white/30">
+                        {feedback.createdAt ? new Date(feedback.createdAt.toDate()).toLocaleString() : 'Reciente'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <p className="text-sm text-white/80 bg-black/30 p-4 rounded-xl border border-white/5 whitespace-pre-wrap leading-relaxed">
+                    {feedback.message}
+                  </p>
+                  
+                  <div className="flex flex-wrap gap-3 mt-4 text-xs text-white/40">
+                    {feedback.version && <span className="bg-white/5 px-2 py-1 rounded">Versión: {feedback.version}</span>}
+                    {feedback.macModel && <span className="bg-white/5 px-2 py-1 rounded">Mac: {feedback.macModel}</span>}
+                    {feedback.macOS && <span className="bg-white/5 px-2 py-1 rounded">OS: {feedback.macOS}</span>}
+                  </div>
+                </div>
+              ))}
+              
+              {allFeedback.length === 0 && (
+                <div className="text-center text-white/50 py-10">No hay comentarios registrados.</div>
               )}
             </div>
           </div>
