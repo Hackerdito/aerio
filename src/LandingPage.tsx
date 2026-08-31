@@ -56,7 +56,7 @@ export default function LandingPage() {
 
     const link = document.createElement('a');
     link.href = `https://aerio-three.vercel.app/Builds/Aerio-4.3.zip`;
-    link.download = `Aerio-4.3.zip`;
+    link.download = `Aerio-4.4.zip`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -64,7 +64,8 @@ export default function LandingPage() {
   };
 
   const versionHistory = [
-    { version: "4.3 — Actual", features: ["Nuevo sitio oficial: aerio.website.", "Nueva campana en la barra superior.", "Al pulsar la notificación abre la sección Actualizaciones."] },
+    { version: "4.4 — Actual", features: ["Análisis inteligente con datos reales del Mac.", "Revisión y selección antes de limpiar.", "Desinstalador con revisión conservadora de archivos relacionados."] },
+    { version: "4.3", features: ["Nuevo sitio oficial: aerio.website.", "Nueva campana en la barra superior.", "Al pulsar la notificación abre la sección Actualizaciones."] },
     { version: "4.2", features: ["DNS ahora aparece debajo de Probar velocidad, ocupando su propia fila.", "Al escanear aplicaciones aparece una lupa orbitando con indicador de progreso.", "Al buscar archivos grandes aparece su propia animación.", "Al buscar actualizaciones aparece un indicador animado dentro del círculo.", "Cada animación funciona únicamente durante su operación.", "Historial de Créditos actualizado.", "Icono oficial conservado."] },
     { version: "3.9", features: ["Sincronización automática del número de versión en toda la interfaz.", "Versión correcta en el menú lateral, Inicio, barra superior, terminal y Créditos.", "Preparación del sistema de actualizaciones para futuras versiones."] },
     { version: "3.8", features: ["Créditos simplificados para mostrar únicamente el número de versión.", "Espacio libre del disco visible en verde desde el panel principal.", "Conservación del icono oficial de Aerio."] },
@@ -238,7 +239,7 @@ export default function LandingPage() {
                       transition={{ duration: 0.3 }}
                       className="flex items-center gap-3 relative z-10"
                     >
-                      <span className="font-medium text-base md:text-lg">Descargar Aerio 4.3</span>
+                      <span className="font-medium text-base md:text-lg">Descargar Aerio 4.4</span>
                       <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1" />
                     </motion.div>
                   )}
