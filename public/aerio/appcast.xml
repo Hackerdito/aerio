@@ -6,26 +6,25 @@
     <description>Versiones oficiales de Aerio por Hackerdito</description>
     <language>es</language>
     <item>
-      <title>Aerio 4.4</title>
+      <title>Aerio 5.0</title>
       <description><![CDATA[
-        <h2>Aerio 4.4</h2>
+        <h2>Aerio 5.0</h2>
         <ul>
-          <li>Nuevo análisis inteligente local con espacio recuperable real.</li>
-          <li>Cachés organizadas por categoría, revisión y selección individual.</li>
-          <li>Filtros para archivos grandes y acceso directo a Finder.</li>
-          <li>Desinstalador con revisión conservadora de archivos relacionados.</li>
-          <li>Resultado animado de limpieza, privacidad y apoyo voluntario.</li>
+          <li>Nueva edición Universal nativa para Apple Silicon e Intel.</li>
+          <li>Una sola descarga compatible con arm64 y x86_64.</li>
+          <li>Conserva el análisis inteligente local y todas las herramientas seguras de Aerio 4.4.</li>
+          <li>Versión, historial y sistema de actualización migrados a Aerio 5.0.</li>
         </ul>
       ]]></description>
-      <pubDate>Sun, 30 Aug 2026 23:10:00 -0600</pubDate>
-      <sparkle:version>20</sparkle:version>
-      <sparkle:shortVersionString>4.4</sparkle:shortVersionString>
+      <pubDate>Tue, 01 Sep 2026 19:30:00 -0600</pubDate>
+      <sparkle:version>21</sparkle:version>
+      <sparkle:shortVersionString>5.0</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-      <enclosure url="https://aerio.website/aerio/Aerio-4.4.zip"
-                 length="1453597"
+      <enclosure url="https://aerio.website/aerio/Aerio-5.0.zip"
+                 length="2506401"
                  type="application/octet-stream"
-                 sparkle:version="20"
-                 sparkle:shortVersionString="4.4" />
+                 sparkle:version="21"
+                 sparkle:shortVersionString="5.0" />
     </item>
   </channel>
 </rss>
