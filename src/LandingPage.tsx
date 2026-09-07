@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Download, Shield, Database, Apple, Cpu, Coffee, History, CheckCircle2, Layers, Terminal, Zap, Globe, FileSearch, Info, Lock, ArrowRight, Bell, MessageSquare, Star, MessageCircle, Trash2 } from 'lucide-react';
+import { 
+  Download, Shield, Database, Apple, Cpu, Coffee, History, CheckCircle2, 
+  Layers, Terminal, Zap, Globe, FileSearch, Info, Lock, ArrowRight, Bell, 
+  MessageSquare, Star, MessageCircle, Trash2, BookOpen, Mail, Calendar, 
+  Clock, ExternalLink, X, Send, Sparkles, Heart
+} from 'lucide-react';
 import { cn } from './lib/utils';
 import { db } from './lib/firebase';
 import { collection, addDoc, serverTimestamp, query, onSnapshot } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
+import SideNavigation from './components/SideNavigation';
 
 export default function LandingPage() {
   const [downloading, setDownloading] = useState(false);
   const [showAllVersions, setShowAllVersions] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [selectedArticle, setSelectedArticle] = useState<any | null>(null);
   const [userIp, setUserIp] = useState<string>('unknown');
   const [userGeo, setUserGeo] = useState<{country?: string, city?: string}>({});
   const [testimonials, setTestimonials] = useState<any[]>([]);
@@ -72,8 +79,8 @@ export default function LandingPage() {
     }
 
     const link = document.createElement('a');
-    link.href = `https://aerio-three.vercel.app/Builds/Aerio-4.4.zip`;
-    link.download = `Aerio-4.4.zip`;
+    link.href = `https://aerio-three.vercel.app/Builds/Aerio-5.0.zip`;
+    link.download = `Aerio-5.0.zip`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -81,7 +88,8 @@ export default function LandingPage() {
   };
 
   const versionHistory = [
-    { version: "4.4 — Actual", features: ["Análisis inteligente con datos reales del Mac.", "Cachés separadas por usuario, aplicaciones, navegadores y temporales seguros.", "Revisión y selección antes de limpiar.", "Filtros para archivos de +500 MB, +1 GB, +5 GB y +10 GB.", "Ruta, tipo, fecha y botón “Mostrar en Finder”.", "Desinstalador con revisión conservadora de archivos relacionados."] },
+    { version: "5.0 — Actual", features: ["Nueva aplicación Universal para Apple Silicon e Intel.", "Una sola descarga compatible con arm64 y x86_64.", "Soporte nativo para M1, M2, M3 y M4.", "Compatibilidad con Intel que tenga macOS 13 o posterior.", "Se mantienen todas las funciones seguras de Aerio 4.4.", "Compilación interna actualizada a 21.", "Canal de actualizaciones migrado a Aerio 5.0.", "Icono oficial original conservado."] },
+    { version: "4.4", features: ["Análisis inteligente con datos reales del Mac.", "Cachés separadas por usuario, aplicaciones, navegadores y temporales seguros.", "Revisión y selección antes de limpiar.", "Filtros para archivos de +500 MB, +1 GB, +5 GB y +10 GB.", "Ruta, tipo, fecha y botón “Mostrar en Finder”.", "Desinstalador con revisión conservadora de archivos relacionados."] },
     { version: "4.3", features: ["Nuevo sitio oficial: aerio.website.", "Nueva campana en la barra superior.", "Al pulsar la notificación abre la sección Actualizaciones."] },
     { version: "4.2", features: ["DNS ahora aparece debajo de Probar velocidad, ocupando su propia fila.", "Al escanear aplicaciones aparece una lupa orbitando con indicador de progreso.", "Al buscar archivos grandes aparece su propia animación.", "Al buscar actualizaciones aparece un indicador animado dentro del círculo.", "Cada animación funciona únicamente durante su operación.", "Historial de Créditos actualizado.", "Icono oficial conservado."] },
     { version: "3.9", features: ["Sincronización automática del número de versión en toda la interfaz.", "Versión correcta en el menú lateral, Inicio, barra superior, terminal y Créditos.", "Preparación del sistema de actualizaciones para futuras versiones."] },
@@ -111,10 +119,59 @@ export default function LandingPage() {
   const screenshots = [
     "https://aerio-three.vercel.app/img/1.png",
     "https://aerio-three.vercel.app/img/2.png", 
-    "https://aerio-three.vercel.app/img/3.png",
+    "https://aerio-three.vercel.app/img/3.png", 
     "https://aerio-three.vercel.app/img/4.png", 
     "https://aerio-three.vercel.app/img/5.png", 
     "https://aerio-three.vercel.app/img/6.png"
+  ];
+
+  const blogArticles = [
+    {
+      id: 1,
+      title: "Memoria Unificada y Cachés: Por qué tu Mac no necesita liberadores agresivos",
+      date: "28 de Febrero, 2026",
+      readTime: "4 min de lectura",
+      tag: "Arquitectura macOS",
+      summary: "Descubre cómo macOS gestiona la memoria compartida entre CPU y GPU en chips Apple Silicon, y por qué forzar la liberación de memoria en realidad reduce el rendimiento.",
+      content: `En la arquitectura clásica x86 de Intel, la memoria RAM y la memoria de video estaban físicamente separadas, lo que obligaba al sistema a mover paquetes de datos constantemente a través de buses PCIe. Con la llegada de Apple Silicon (M1, M2, M3 y M4), Apple introdujo la Memoria Unificada (Unified Memory Architecture - UMA).
+
+¿Qué significa esto para el mantenimiento?
+En macOS moderno, "memoria libre es memoria desperdiciada". El núcleo Darwin utiliza de manera proactiva la RAM no ocupada para almacenar en caché archivos leídos recientemente y bibliotecas dinámicas. Cuando una aplicación solicita memoria, macOS desaloja instantáneamente las cachés menos prioritarias en nanosegundos sin ninguna degradación perceptible.
+
+Muchos limpiadores tradicionales ejecutan scripts obsoletos como 'purge' o liberadores en segundo plano que vacían estas cachés a la fuerza. Como resultado, las aplicaciones tienen que volver a leer los archivos desde el SSD, aumentando los ciclos de lectura y consumiendo más batería.
+
+En Aerio, diseñamos un enfoque estrictamente conservador: no tocamos los procesos en ejecución ni las cachés dinámicas del kernel; únicamente detectamos y removemos cachés huérfanas de usuario y contenedores de aplicaciones que ya no están activas.`
+    },
+    {
+      id: 2,
+      title: "Application Support vs. Caches: La línea roja de la seguridad",
+      date: "15 de Febrero, 2026",
+      readTime: "5 min de lectura",
+      tag: "Seguridad & Privacidad",
+      summary: "Por qué Aerio nunca toca documentos, preferencias ni carpetas críticas del sistema, protegiendo tus datos contra pérdidas irreparables.",
+      content: `Cualquier herramienta de limpieza que prometa 'liberar 50 GB con un solo clic' suele ocultar un peligro latente: la eliminación indiscriminada de archivos dentro de ~/Library/Application Support.
+
+En esta carpeta residen bases de datos SQLite de aplicaciones profesionales, credenciales cifradas, historial de chats, plantillas de diseño y configuraciones personalizadas. Borrar elementos aquí puede corromper perfiles enteros de navegadores o inutilizar licencias de software.
+
+La política inquebrantable de Aerio es:
+1. Jamás eliminar bases de datos ni directorios de Application Support de manera automática.
+2. Limitar el análisis a cachés desechables identificadas (~/Library/Caches) y contenedores sandbox huérfanos.
+3. Mostrar siempre una lista detallada con ruta y tamaño antes de cualquier acción.
+4. Si se desinstala una aplicación, enviarla a la Papelera recuperable del sistema en lugar de borrarla de forma destructiva y permanente.`
+    },
+    {
+      id: 3,
+      title: "Optimización nativa: Binarios Universales y Compatibilidad Total",
+      date: "7 de Septiembre, 2026",
+      readTime: "3 min de lectura",
+      tag: "Ingeniería Swift",
+      summary: "El camino técnico hacia Aerio 5.0: cómo logramos fusionar la máxima eficiencia en Apple Silicon con soporte total para procesadores Intel.",
+      content: `Aerio fue reconstruido desde cero pensando en el máximo rendimiento. Con la llegada de la versión 5.0, hemos dado un paso crucial: empaquetar una aplicación Universal verdadera.
+
+Al compilar un solo binario compatible con arquitecturas arm64 (Apple Silicon M1, M2, M3, M4) y x86_64 (Intel Core i5, i7, i9), permitimos que tu Mac elija nativamente el código correcto. En Apple Silicon, Aerio 5.0 ejecuta sus rutinas aprovechando los Efficient Cores sin pasar por Rosetta 2, y en equipos Intel, aprovecha instrucciones optimizadas para macOS 13+.
+
+El resultado es una interfaz fluida a 120 Hz en pantallas ProMotion con un consumo mínimo, garantizando que todos los usuarios de Mac tengan la misma experiencia premium en una sola descarga.`
+    }
   ];
 
   return (
@@ -132,72 +189,64 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/40 to-black pointer-events-none" />
       </div>
 
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 p-4 md:p-6 flex justify-between items-center bg-black/20 backdrop-blur-2xl border-b border-white/5 transition-all duration-300 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
-        <div className="w-full max-w-7xl mx-auto flex justify-between items-center px-2 md:px-6">
-          <div className="flex items-center gap-3">
-            {/* [CUSTOMIZACIÓN - LOGO SUPERIOR]: Para hacerlo menos redondo cambia "rounded-[10px]" a "rounded-md" o "rounded-full". w-10 h-10 controla el tamaño. */}
-            <div className="w-10 h-10 rounded-[10px] overflow-hidden bg-white/5 flex items-center justify-center border border-white/10">
-               <img src="https://aerio-three.vercel.app/aerio.png" alt="Aerio Logo" className="w-full h-full object-cover" />
-            </div>
-            <span className="font-medium text-xl text-white">Aerio</span>
-          </div>
+      {/* Navegación lateral desplegable (Botón discreto en la esquina superior izquierda, sin barra horizontal tradicional) */}
+      <SideNavigation onDownload={handleDownload} downloading={downloading} />
 
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <button 
-                onClick={() => setShowNotification(!showNotification)}
-                className="relative p-2.5 rounded-full border border-white/20 hover:bg-white/10 transition-all backdrop-blur-md text-white"
-                title="Actualizaciones"
+      {/* Utilidades flotantes en la esquina superior derecha (Notificaciones de versión y apoyo en Ko-fi) */}
+      <div className="fixed top-5 right-5 md:top-6 md:right-8 z-40 flex items-center gap-3">
+        <div className="relative">
+          <button 
+            onClick={() => setShowNotification(!showNotification)}
+            className="relative p-2.5 rounded-2xl border border-white/15 bg-black/40 hover:bg-white/10 hover:border-white/30 transition-all backdrop-blur-xl text-white shadow-[0_8px_32px_rgba(0,0,0,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            title="Actualizaciones y novedades"
+            aria-label="Ver novedades y actualizaciones de Aerio"
+          >
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#09070f]"></span>
+          </button>
+
+          <AnimatePresence>
+            {showNotification && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                className="absolute top-full right-0 mt-3 w-80 bg-[#130b1c]/95 backdrop-blur-xl border border-white/15 rounded-2xl shadow-2xl p-5 z-50 origin-top-right"
               >
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#09070f]"></span>
-              </button>
-
-              <AnimatePresence>
-                {showNotification && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute top-full right-0 mt-3 w-80 bg-[#130b1c]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-5 z-50 origin-top-right"
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-white">Novedades</h3>
-                      <span className="text-xs font-medium px-2.5 py-1 bg-[#ff007f]/20 text-[#ff007f] rounded-full border border-[#ff007f]/30">
-                        {versionHistory[0].version}
-                      </span>
-                    </div>
-                    <ul className="space-y-3">
-                      {versionHistory[0].features.map((feature, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm text-white/70">
-                          <CheckCircle2 className="w-4 h-4 text-[#ff007f] shrink-0 mt-0.5" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-            
-            <a 
-              href="https://ko-fi.com/hackerdito" 
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 px-4 md:px-5 py-2.5 rounded-full border border-white/20 hover:bg-white/10 transition-all backdrop-blur-md text-white text-sm font-medium"
-            >
-              <Coffee className="w-4 h-4 text-yellow-500" />
-              <span className="hidden sm:inline">Invítame un café</span>
-              <span className="sm:hidden">Apoyar</span>
-            </a>
-          </div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-white">Novedades</h3>
+                  <span className="text-xs font-medium px-2.5 py-1 bg-[#ff007f]/20 text-[#ff007f] rounded-full border border-[#ff007f]/30">
+                    {versionHistory[0].version}
+                  </span>
+                </div>
+                <ul className="space-y-3">
+                  {versionHistory[0].features.map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-sm text-white/70">
+                      <CheckCircle2 className="w-4 h-4 text-[#ff007f] shrink-0 mt-0.5" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </header>
+        
+        <a 
+          href="https://ko-fi.com/hackerdito" 
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-2 px-4 md:px-5 py-2.5 rounded-2xl border border-white/15 bg-black/40 hover:bg-white/10 hover:border-white/30 transition-all backdrop-blur-xl text-white text-sm font-medium shadow-[0_8px_32px_rgba(0,0,0,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        >
+          <Coffee className="w-4 h-4 text-yellow-500" />
+          <span className="hidden sm:inline">Invítame un café</span>
+          <span className="sm:hidden">Apoyar</span>
+        </a>
+      </div>
 
       {/* Hero Section */}
-      <section className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-36 md:pt-48 pb-12">
+      <section id="inicio" className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 pt-36 md:pt-48 pb-12">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">
           
           {/* Left Column - Text & Buttons */}
@@ -256,7 +305,7 @@ export default function LandingPage() {
                       transition={{ duration: 0.3 }}
                       className="flex items-center gap-3 relative z-10"
                     >
-                      <span className="font-medium text-base md:text-lg">Descargar Aerio 4.4</span>
+                      <span className="font-medium text-base md:text-lg">Descargar Aerio 5.0</span>
                       <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1" />
                     </motion.div>
                   )}
@@ -268,21 +317,9 @@ export default function LandingPage() {
                   <span className="px-4 py-2.5 md:px-5 md:py-3 rounded-full border border-white/20 text-white/90 text-xs md:text-sm font-medium flex items-center gap-2 backdrop-blur-md bg-white/5">
                     <Apple className="w-3 h-3 md:w-4 md:h-4" /> macOS 13+
                   </span>
-                  <span className="px-4 py-2.5 md:px-5 md:py-3 rounded-full border border-white/20 text-white/90 text-xs md:text-sm font-medium flex items-center gap-2 backdrop-blur-md bg-white/5">
-                    <Cpu className="w-3 h-3 md:w-4 md:h-4" /> Apple Silicon
+                  <span className="px-4 py-2.5 md:px-5 md:py-3 rounded-full border border-green-500/30 text-green-400 text-xs md:text-sm font-medium flex items-center gap-2 backdrop-blur-md bg-green-500/10 cursor-default">
+                    <Cpu className="w-3 h-3 md:w-4 md:h-4" /> Universal (Apple Silicon & Intel)
                   </span>
-                  
-                  {/* Intel Beta Badge */}
-                  <div className="relative group">
-                    <span className="px-4 py-2.5 md:px-5 md:py-3 rounded-full border border-[#f5a623]/30 text-[#f5a623] text-xs md:text-sm font-medium flex items-center gap-2 backdrop-blur-md bg-[#f5a623]/5 cursor-default transition-colors group-hover:bg-[#f5a623]/10">
-                      <Cpu className="w-3 h-3 md:w-4 md:h-4" /> Intel (Beta)
-                    </span>
-                    {/* Tooltip */}
-                    <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-48 opacity-0 group-hover:opacity-100 transition-opacity bg-[#1a1a1a] border border-white/10 text-xs text-white/80 rounded-lg p-3 pointer-events-none text-center shadow-xl z-50">
-                      <div className="font-semibold text-white mb-1">En desarrollo</div>
-                      Soporte beta funcional. ¡Próximamente 100% estable!
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -293,7 +330,7 @@ export default function LandingPage() {
       </section>
 
       {/* Real Features - Apple Style */}
-      <section className="relative z-10 py-12 md:py-20 px-6 max-w-7xl mx-auto space-y-24 md:space-y-32">
+      <section id="funciones" className="relative z-10 py-12 md:py-20 px-6 max-w-7xl mx-auto space-y-24 md:space-y-32">
         {/* Feature 1 */}
         <div className="flex flex-col md:flex-row items-center gap-16 md:gap-24">
           <div className="w-full md:w-[55%]">
@@ -386,8 +423,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Security & Protection */}
-      <section className="relative z-10 py-24 px-6">
+      {/* Security & Protection / Cómo funciona */}
+      <section id="como-funciona" className="relative z-10 py-24 px-6">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/10 blur-[120px] -z-10 rounded-full pointer-events-none" />
         <div className="max-w-4xl mx-auto bg-white/[0.02] border border-white/10 p-10 md:p-16 rounded-[3rem] text-center shadow-2xl backdrop-blur-3xl hover:bg-white/[0.04] transition-all duration-500">
           <div className="w-20 h-20 bg-purple-500/10 border border-purple-500/20 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner">
@@ -405,16 +442,15 @@ export default function LandingPage() {
       <section className="relative z-10 py-24 px-6 max-w-4xl mx-auto text-center border-t border-white/5">
         <h2 className="text-3xl md:text-4xl font-bold mb-12 flex items-center justify-center gap-4 tracking-tight">
           <Cpu className="w-10 h-10 text-white/80" />
-          Compatibilidad Exclusiva
+          Compatibilidad Universal
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
           <div className="bg-white/[0.03] border border-white/10 p-10 rounded-[2.5rem] backdrop-blur-2xl hover:bg-white/[0.06] hover:border-white/20 transition-all duration-500 shadow-2xl">
-            <h3 className="font-bold text-2xl mb-6 text-white/90">Chips Apple Silicon</h3>
+            <h3 className="font-bold text-2xl mb-6 text-white/90">Procesadores Apple e Intel</h3>
             <ul className="space-y-4 text-white/60">
-              <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500" /> Apple M1, M1 Pro, M1 Max, M1 Ultra</li>
-              <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500" /> Apple M2 y variantes</li>
-              <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500" /> Apple M3 y variantes</li>
-              <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500" /> Apple M4 y posteriores</li>
+              <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500" /> Apple M1, M2, M3, M4 y variantes</li>
+              <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500" /> Intel Core i5, i7, i9</li>
+              <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500" /> App Universal en una sola descarga</li>
             </ul>
           </div>
           <div className="bg-white/[0.03] border border-white/10 p-10 rounded-[2.5rem] backdrop-blur-2xl hover:bg-white/[0.06] hover:border-white/20 transition-all duration-500 shadow-2xl flex flex-col justify-between">
@@ -424,8 +460,8 @@ export default function LandingPage() {
                 <li className="flex items-center gap-3"><CheckCircle2 className="w-5 h-5 text-green-500" /> macOS 13 Ventura o superior</li>
               </ul>
             </div>
-            <div className="mt-8 p-4 bg-black/20 rounded-2xl border border-white/5 text-white/40 italic text-sm text-center">
-              Nota: No existe soporte para procesadores Intel.
+            <div className="mt-8 p-4 bg-green-500/10 rounded-2xl border border-green-500/20 text-green-400 font-medium text-sm text-center">
+              Ahora con soporte total para Intel
             </div>
           </div>
         </div>
@@ -567,6 +603,236 @@ export default function LandingPage() {
           )}
         </div>
       </section>
+
+      {/* Blog & Notas Técnicas */}
+      <section id="blog" className="relative z-10 py-24 px-6 max-w-7xl mx-auto border-t border-white/5">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-[2px] bg-blue-500"></div>
+              <span className="text-blue-400 font-bold text-xs tracking-wider uppercase">Ingeniería y Artículos</span>
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight">
+              Blog de Aerio
+            </h2>
+          </div>
+          <p className="text-white/50 text-base max-w-md">
+            Artículos técnicos, notas de arquitectura y análisis sobre el mantenimiento seguro en macOS, procesadores Apple e Intel.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {blogArticles.map((article) => (
+            <article 
+              key={article.id}
+              className="bg-white/[0.03] border border-white/10 rounded-[2rem] p-8 flex flex-col justify-between hover:bg-white/[0.06] hover:border-white/20 transition-all duration-300 shadow-xl group"
+            >
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-6">
+                  <span className="text-xs font-semibold px-3 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">
+                    {article.tag}
+                  </span>
+                  <div className="flex items-center gap-1.5 text-xs text-white/40 font-medium">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>{article.readTime}</span>
+                  </div>
+                </div>
+
+                <h3 className="text-xl font-bold text-white/90 group-hover:text-white leading-snug mb-4 transition-colors">
+                  {article.title}
+                </h3>
+                
+                <p className="text-white/60 text-sm leading-relaxed mb-6">
+                  {article.summary}
+                </p>
+              </div>
+
+              <div className="pt-6 border-t border-white/10 flex items-center justify-between mt-auto">
+                <span className="text-xs text-white/40">{article.date}</span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedArticle(article)}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-blue-400 group-hover:text-blue-300 transition-colors"
+                >
+                  <span>Leer artículo</span>
+                  <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* Acerca de Aerio */}
+      <section id="acerca-de" className="relative z-10 py-24 px-6 max-w-5xl mx-auto border-t border-white/5">
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-semibold tracking-wider uppercase mb-4">
+            <Info className="w-3.5 h-3.5" /> Filosofía de Diseño
+          </div>
+          <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">
+            Acerca de Aerio
+          </h2>
+          <p className="text-white/60 text-lg leading-relaxed">
+            Una herramienta construida con un principio fundamental: tu Mac debe ser rápida sin comprometer jamás la seguridad de tus datos.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          <div className="bg-white/[0.03] border border-white/10 p-8 rounded-[2rem] backdrop-blur-2xl">
+            <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-6 text-purple-400">
+              <Shield className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-3">100% Local y Transparente</h3>
+            <p className="text-white/60 text-sm leading-relaxed">
+              Sin telemetría invasiva, sin venta de datos ni procesos ocultos en segundo plano. Todas las operaciones se ejecutan de manera transparente con confirmación explícita del usuario.
+            </p>
+          </div>
+
+          <div className="bg-white/[0.03] border border-white/10 p-8 rounded-[2rem] backdrop-blur-2xl">
+            <div className="w-12 h-12 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center mb-6 text-green-400">
+              <Apple className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-3">Aplicación Universal</h3>
+            <p className="text-white/60 text-sm leading-relaxed">
+              Soporte total en una sola descarga para procesadores Apple Silicon (M1 a M4) e Intel, garantizando máxima eficiencia nativa en tu Mac con macOS 13+.
+            </p>
+          </div>
+        </div>
+
+        {/* Autor y Créditos */}
+        <div className="bg-gradient-to-r from-purple-900/20 via-blue-900/10 to-transparent border border-white/10 rounded-[2.5rem] p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 backdrop-blur-2xl">
+          <div className="flex items-center gap-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center font-bold text-2xl text-white shadow-xl shadow-purple-500/20 shrink-0">
+              H
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <h4 className="text-xl font-bold text-white">Hackerdito</h4>
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-white/10 text-white/70 font-medium">Creador</span>
+              </div>
+              <p className="text-sm text-white/50">Desarrollo y diseño de interfaz de Aerio.</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <a 
+              href="https://gerardodg.art" 
+              target="_blank" 
+              rel="noreferrer"
+              className="px-5 py-2.5 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-all flex items-center gap-2 backdrop-blur-md"
+            >
+              <span>Portafolio</span>
+              <ExternalLink className="w-3.5 h-3.5 text-white/60" />
+            </a>
+            <a 
+              href="https://aerio-three.vercel.app" 
+              target="_blank" 
+              rel="noreferrer"
+              className="px-5 py-2.5 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-all flex items-center gap-2 backdrop-blur-md"
+            >
+              <span>aerio-three.vercel.app</span>
+              <ExternalLink className="w-3.5 h-3.5 text-white/60" />
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Contacto */}
+      <section id="contacto" className="relative z-10 py-24 px-6 max-w-4xl mx-auto border-t border-white/5">
+        <div className="bg-white/[0.02] border border-white/10 rounded-[3rem] p-10 md:p-16 backdrop-blur-3xl text-center shadow-2xl">
+          <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mx-auto mb-6 text-blue-400">
+            <Mail className="w-8 h-8" />
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
+            Contacto y Retroalimentación
+          </h2>
+          <p className="text-white/60 text-base max-w-xl mx-auto mb-8 leading-relaxed">
+            ¿Tienes sugerencias, encontraste algún comportamiento inusual o deseas compartir tu opinión sobre Aerio? Nos encantaría escucharte.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              to="/feedback"
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 transition-all active:scale-95"
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span>Dejar un comentario en la web</span>
+            </Link>
+
+            <a
+              href="mailto:gerito.diseno@gmail.com"
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/15 text-white font-semibold flex items-center justify-center gap-2 transition-all active:scale-95"
+            >
+              <Mail className="w-4 h-4 text-white/60" />
+              <span>gerito.diseno@gmail.com</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Modal de Lectura de Artículos del Blog */}
+      <AnimatePresence>
+        {selectedArticle && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 md:p-10">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedArticle(null)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-md z-[110]"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative z-[111] max-w-2xl w-full max-h-[85vh] bg-[#120a1c] border border-white/15 rounded-[2.5rem] p-6 sm:p-10 overflow-y-auto shadow-2xl custom-scrollbar"
+            >
+              <div className="flex items-center justify-between gap-4 mb-6">
+                <span className="text-xs font-semibold px-3 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">
+                  {selectedArticle.tag}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedArticle(null)}
+                  className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-white/70 hover:text-white flex items-center justify-center transition-colors"
+                  aria-label="Cerrar artículo"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 leading-tight">
+                {selectedArticle.title}
+              </h2>
+
+              <div className="flex items-center gap-4 text-xs text-white/40 pb-6 mb-6 border-b border-white/10">
+                <span>{selectedArticle.date}</span>
+                <span>•</span>
+                <span>{selectedArticle.readTime}</span>
+              </div>
+
+              <div className="text-white/80 leading-relaxed space-y-4 text-base whitespace-pre-line font-normal">
+                {selectedArticle.content}
+              </div>
+
+              <div className="mt-10 pt-6 border-t border-white/10 flex items-center justify-between">
+                <div className="text-xs text-white/50">
+                  Publicado por <strong>Hackerdito</strong>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedArticle(null)}
+                  className="px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-sm font-medium transition-colors"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Footer / Credits */}
       <footer className="relative z-10 mt-20 pt-16 pb-12 px-6 flex flex-col items-center text-center">
