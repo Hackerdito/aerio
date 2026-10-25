@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import { db } from './lib/firebase';
-import { collection, addDoc, serverTimestamp, query, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, onSnapshot } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
 import SideNavigation from './components/SideNavigation';
 
@@ -47,18 +47,22 @@ export default function LandingPage() {
     };
     recordVisit();
 
-    // Fetch all testimonials
-    const qFeedback = query(collection(db, 'feedback'));
-    const unsubFeedback = onSnapshot(qFeedback, (snapshot) => {
-      const allFeedbacks = snapshot.docs.map(document => ({ id: document.id, ...document.data() }));
-      // Sort in client
-      allFeedbacks.sort((a: any, b: any) => {
-        const timeA = a.createdAt?.toMillis() || 0;
-        const timeB = b.createdAt?.toMillis() || 0;
-        return timeB - timeA;
-      });
-      setTestimonials(allFeedbacks);
-    });
+    // Fetch only public testimonials
+    const qFeedback = query(collection(db, 'feedback'), where('public', '==', true));
+    const unsubFeedback = onSnapshot(
+      qFeedback,
+      (snapshot) => {
+        const allFeedbacks = snapshot.docs.map(document => ({ id: document.id, ...document.data() }));
+        // Sort in client
+        allFeedbacks.sort((a: any, b: any) => {
+          const timeA = a.createdAt?.toMillis() || 0;
+          const timeB = b.createdAt?.toMillis() || 0;
+          return timeB - timeA;
+        });
+        setTestimonials(allFeedbacks);
+      },
+      (error) => console.error("Error loading testimonials:", error)
+    );
 
     return () => unsubFeedback();
   }, []);
@@ -520,8 +524,10 @@ El resultado es una interfaz fluida a 120 Hz en pantallas ProMotion con un consu
                   }
                 }
               }
-              const name = testimonio.name || 'Anónimo';
-              const initial = name.charAt(0).toUpperCase();
+              // Nunca mostrar el email del usuario en la landing
+              const rawName = (testimonio.name || '').trim();
+              const displayName = rawName && !rawName.includes('@') ? rawName : (rawName ? rawName.split('@')[0] : 'Anónimo');
+              const initial = displayName.charAt(0).toUpperCase() || 'A';
               
               return (
                 <div key={testimonio.id} className="min-w-[320px] md:min-w-[420px] max-w-[420px] bg-white/[0.03] border border-white/10 p-6 md:p-8 rounded-[32px] snap-center flex flex-col justify-between hover:bg-white/[0.05] transition-colors relative group">
@@ -531,7 +537,7 @@ El resultado es una interfaz fluida a 120 Hz en pantallas ProMotion con un consu
                         {initial}
                       </div>
                       <div>
-                        <h4 className="font-semibold text-white/90 text-lg">{name}</h4>
+                        <h4 className="font-semibold text-white/90 text-lg">{displayName}</h4>
                         <p className="text-sm text-blue-400 font-medium">{timeAgo}</p>
                       </div>
                     </div>

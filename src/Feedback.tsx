@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { db } from './lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ArrowLeft, CheckCircle2, AlertCircle, MessageSquare, Lightbulb, Bug, AlertTriangle, Sparkles, Star } from 'lucide-react';
@@ -13,14 +13,14 @@ const FEEDBACK_TYPES = [
   { id: 'feature', label: 'Nueva función', icon: <Sparkles className="w-4 h-4 text-blue-400" /> },
 ];
 
-const VERSIONS = ['4.4', '4.3', 'Otra'];
+const VERSIONS = ['5.0', '4.4', '4.3', 'Otra'];
 
 export default function Feedback() {
   const [formData, setFormData] = useState({
     type: 'like',
     name: '',
     email: '',
-    version: '4.4',
+    version: '5.0',
     macModel: '',
     macOS: '',
     message: '',
@@ -44,6 +44,7 @@ export default function Feedback() {
     try {
       await addDoc(collection(db, 'feedback'), {
         ...formData,
+        public: false,
         status: 'new',
         createdAt: serverTimestamp()
       });
@@ -52,7 +53,7 @@ export default function Feedback() {
         type: 'like',
         name: '',
         email: '',
-        version: '4.4',
+        version: '5.0',
         macModel: '',
         macOS: '',
         message: '',

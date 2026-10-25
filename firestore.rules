@@ -1,28 +1,33 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Function to check if the user is the owner/admin
+
     function isAdmin() {
-      return request.auth != null && request.auth.token.email == 'gerito.diseno@gmail.com';
+      return request.auth != null
+        && request.auth.token.email == 'gerito.diseno@gmail.com'
+        && request.auth.token.email_verified == true;
     }
 
-    // Anyone can log a visit, but only the admin can read/manage them
     match /visits/{visitId} {
-      allow create: if true;
+      allow create: if request.resource.data.keys().hasOnly(['ip','country','city','timestamp','userAgent'])
+                    && request.resource.data.timestamp == request.time;
       allow read, update, delete: if isAdmin();
     }
 
-    // Anyone can log a download, but only the admin can read/manage them
     match /downloads/{downloadId} {
-      allow create: if true;
+      allow create: if request.resource.data.keys().hasOnly(['ip','country','city','timestamp'])
+                    && request.resource.data.timestamp == request.time;
       allow read, update, delete: if isAdmin();
     }
 
-    // Anyone can submit and read feedback, only admin can manage
     match /feedback/{feedbackId} {
-      allow create: if true;
-      allow read: if true;
+      allow create: if request.resource.data.get('public', false) == false
+                    && request.resource.data.status == 'new'
+                    && request.resource.data.message is string
+                    && request.resource.data.message.size() > 0
+                    && request.resource.data.message.size() <= 3000
+                    && request.resource.data.createdAt == request.time;
+      allow read: if resource.data.get('public', false) == true || isAdmin();
       allow update, delete: if isAdmin();
     }
   }
