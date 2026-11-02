@@ -19,6 +19,11 @@ async function prerender() {
 
   const baseTemplate = fs.readFileSync(templatePath, 'utf-8');
 
+  // 1. Guardar copia sin pre-renderizar como dist/app.html antes de sobrescribir index.html
+  const appHtmlPath = path.resolve(distDir, 'app.html');
+  fs.writeFileSync(appHtmlPath, baseTemplate, 'utf-8');
+  console.log(`💾 Saved un-prerendered template to dist/app.html`);
+
   // List of all public routes
   const routes = [
     '/',
@@ -34,32 +39,87 @@ async function prerender() {
 
   for (const route of routes) {
     try {
-      const appHtml = renderToString(
+      const rawAppHtml = renderToString(
         React.createElement(StaticRouter, { location: route }, React.createElement(AppRoutes))
       );
 
+      // Extract title and description from rendered output before stripping
+      const titleMatch = rawAppHtml.match(/<title\b[^>]*>(.*?)<\/title>/i);
+      const pageTitle = titleMatch ? titleMatch[1] : 'Aerio — Limpiador gratuito y seguro para Mac';
+
+      const descMatch = rawAppHtml.match(/<meta\b[^>]*name=["']description["'][^>]*content=["'](.*?)["']/i);
+      const pageDesc = descMatch ? descMatch[1] : 'Aerio es un limpiador gratuito para Mac (Apple Silicon e Intel) que elimina cachés huérfanas y desinstala apps de forma segura, sin tocar tus documentos.';
+
+      const canonicalUrl = `https://aerio.website${route === '/' ? '/' : route}`;
+
+      // Eliminar de appHtml todas las etiquetas <title>, <meta> y <link rel="canonical">
+      const cleanAppHtml = rawAppHtml
+        .replace(/<title\b[^>]*>.*?<\/title>/gis, '')
+        .replace(/<meta\b[^>]*\/?>/gis, '')
+        .replace(/<link\b[^>]*rel=["']canonical["'][^>]*\/?>/gis, '');
+
       let pageHtml = baseTemplate;
 
-      // Extract title if present in rendered output
-      const titleMatch = appHtml.match(/<title>(.*?)<\/title>/);
-      if (titleMatch) {
-        pageHtml = pageHtml.replace(/<title>.*?<\/title>/, `<title>${titleMatch[1]}</title>`);
+      // 1. Reemplazar <title>
+      pageHtml = pageHtml.replace(/<title\b[^>]*>.*?<\/title>/i, `<title>${pageTitle}</title>`);
+
+      // 2. Reemplazar <meta name="description">
+      if (/<meta\b[^>]*name=["']description["'][^>]*\/?>/i.test(pageHtml)) {
+        pageHtml = pageHtml.replace(
+          /<meta\b[^>]*name=["']description["'][^>]*\/?>/i,
+          `<meta name="description" content="${pageDesc}" />`
+        );
+      } else {
+        pageHtml = pageHtml.replace('</head>', `  <meta name="description" content="${pageDesc}" />\n  </head>`);
       }
 
-      // Extract description if present
-      const descMatch = appHtml.match(/<meta[^>]*name=["']description["'][^>]*content=["'](.*?)["']/);
-      if (descMatch) {
+      // 3. Reemplazar og:title
+      if (/<meta\b[^>]*property=["']og:title["'][^>]*\/?>/i.test(pageHtml)) {
         pageHtml = pageHtml.replace(
-          /<meta[^>]*name=["']description["'][^>]*content=["'].*?["']\s*\/?>/,
-          `<meta name="description" content="${descMatch[1]}" />`
+          /<meta\b[^>]*property=["']og:title["'][^>]*\/?>/i,
+          `<meta property="og:title" content="${pageTitle}" />`
+        );
+      } else {
+        pageHtml = pageHtml.replace('</head>', `  <meta property="og:title" content="${pageTitle}" />\n  </head>`);
+      }
+
+      // 4. Reemplazar og:description
+      if (/<meta\b[^>]*property=["']og:description["'][^>]*\/?>/i.test(pageHtml)) {
+        pageHtml = pageHtml.replace(
+          /<meta\b[^>]*property=["']og:description["'][^>]*\/?>/i,
+          `<meta property="og:description" content="${pageDesc}" />`
+        );
+      } else {
+        pageHtml = pageHtml.replace('</head>', `  <meta property="og:description" content="${pageDesc}" />\n  </head>`);
+      }
+
+      // 5. Reemplazar og:url
+      if (/<meta\b[^>]*property=["']og:url["'][^>]*\/?>/i.test(pageHtml)) {
+        pageHtml = pageHtml.replace(
+          /<meta\b[^>]*property=["']og:url["'][^>]*\/?>/i,
+          `<meta property="og:url" content="${canonicalUrl}" />`
+        );
+      } else {
+        pageHtml = pageHtml.replace('</head>', `  <meta property="og:url" content="${canonicalUrl}" />\n  </head>`);
+      }
+
+      // 6. Reemplazar o insertar twitter:title
+      if (/<meta\b[^>]*name=["']twitter:title["'][^>]*\/?>/i.test(pageHtml)) {
+        pageHtml = pageHtml.replace(
+          /<meta\b[^>]*name=["']twitter:title["'][^>]*\/?>/i,
+          `<meta name="twitter:title" content="${pageTitle}" />`
+        );
+      } else {
+        pageHtml = pageHtml.replace(
+          /<meta\b[^>]*name=["']twitter:card["'][^>]*\/?>/i,
+          `<meta name="twitter:card" content="summary_large_image" />\n    <meta name="twitter:title" content="${pageTitle}" />`
         );
       }
 
-      // Extract canonical URL or set it based on route
-      const canonicalUrl = `https://aerio.website${route === '/' ? '' : route}`;
-      if (pageHtml.includes('<link rel="canonical"')) {
+      // 7. Reemplazar o insertar <link rel="canonical">
+      if (/<link\b[^>]*rel=["']canonical["'][^>]*\/?>/i.test(pageHtml)) {
         pageHtml = pageHtml.replace(
-          /<link rel="canonical"[^>]*\/?>/,
+          /<link\b[^>]*rel=["']canonical["'][^>]*\/?>/i,
           `<link rel="canonical" href="${canonicalUrl}" />`
         );
       } else {
@@ -69,13 +129,13 @@ async function prerender() {
         );
       }
 
-      // Inject app HTML into #root
+      // Inyectar app HTML limpio dentro de #root (sin <title>, <meta> ni <link rel="canonical">)
       pageHtml = pageHtml.replace(
         '<div id="root"></div>',
-        `<div id="root">${appHtml}</div>`
+        `<div id="root">${cleanAppHtml}</div>`
       );
 
-      // Save to appropriate file path
+      // Guardar en la ruta correspondiente
       let outFilePath: string;
       if (route === '/') {
         outFilePath = path.resolve(distDir, 'index.html');

@@ -1,5 +1,9 @@
 {
   "rewrites": [
+    { "source": "/login", "destination": "/app.html" },
+    { "source": "/dashboard", "destination": "/app.html" },
+    { "source": "/feedback", "destination": "/app.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
+
