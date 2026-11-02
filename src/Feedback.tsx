@@ -73,9 +73,10 @@ export default function Feedback() {
 
   return (
     <div className="min-h-screen bg-black text-white selection:bg-purple-500/30 font-sans pb-20 relative">
+      <meta name="robots" content="noindex, nofollow" />
       <div 
         className="absolute top-0 left-0 w-full h-[600px] z-0 bg-cover bg-top bg-no-repeat opacity-60 pointer-events-none"
-        style={{ backgroundImage: "url('https://aerio-three.vercel.app/bg.png')" }}
+        style={{ backgroundImage: "url('/bg.png')" }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/60 to-black" />
       </div>

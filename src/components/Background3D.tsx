@@ -142,6 +142,20 @@ const Sculpture = () => {
 };
 
 export default function Background3D() {
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || typeof window === 'undefined') {
+    return (
+      <div className="absolute top-0 left-0 w-full h-[100vh] min-h-[900px] z-0 pointer-events-none overflow-hidden bg-black">
+        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#09070f] to-transparent pointer-events-none" />
+      </div>
+    );
+  }
+
   return (
     <div className="absolute top-0 left-0 w-full h-[100vh] min-h-[900px] z-0 pointer-events-none overflow-hidden bg-black">
       {/* Conservamos un dpr entre 1 y 1.5 para mantener buen performance incluso con las altas subdivisiones del plano */}

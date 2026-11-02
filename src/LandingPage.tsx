@@ -11,12 +11,13 @@ import { db } from './lib/firebase';
 import { collection, addDoc, serverTimestamp, query, where, onSnapshot } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
 import SideNavigation from './components/SideNavigation';
+import { ARTICLES } from './data/articles';
+import AdSenseScript from './components/AdSenseScript';
 
 export default function LandingPage() {
   const [downloading, setDownloading] = useState(false);
   const [showAllVersions, setShowAllVersions] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
-  const [selectedArticle, setSelectedArticle] = useState<any | null>(null);
   const [userIp, setUserIp] = useState<string>('unknown');
   const [userGeo, setUserGeo] = useState<{country?: string, city?: string}>({});
   const [testimonials, setTestimonials] = useState<any[]>([]);
@@ -83,7 +84,7 @@ export default function LandingPage() {
     }
 
     const link = document.createElement('a');
-    link.href = `https://aerio-three.vercel.app/Builds/Aerio-5.0.zip`;
+    link.href = `https://aerio.website/Builds/Aerio-5.0.zip`;
     link.download = `Aerio-5.0.zip`;
     document.body.appendChild(link);
     link.click();
@@ -121,73 +122,40 @@ export default function LandingPage() {
   ];
 
   const screenshots = [
-    "https://aerio-three.vercel.app/img/1.png",
-    "https://aerio-three.vercel.app/img/2.png", 
-    "https://aerio-three.vercel.app/img/3.png", 
-    "https://aerio-three.vercel.app/img/4.png", 
-    "https://aerio-three.vercel.app/img/5.png", 
-    "https://aerio-three.vercel.app/img/6.png"
+    "/img/1.png",
+    "/img/2.png", 
+    "/img/3.png", 
+    "/img/4.png", 
+    "/img/5.png", 
+    "/img/6.png"
   ];
 
-  const blogArticles = [
-    {
-      id: 1,
-      title: "Memoria Unificada y Cachés: Por qué tu Mac no necesita liberadores agresivos",
-      date: "28 de Febrero, 2026",
-      readTime: "4 min de lectura",
-      tag: "Arquitectura macOS",
-      summary: "Descubre cómo macOS gestiona la memoria compartida entre CPU y GPU en chips Apple Silicon, y por qué forzar la liberación de memoria en realidad reduce el rendimiento.",
-      content: `En la arquitectura clásica x86 de Intel, la memoria RAM y la memoria de video estaban físicamente separadas, lo que obligaba al sistema a mover paquetes de datos constantemente a través de buses PCIe. Con la llegada de Apple Silicon (M1, M2, M3 y M4), Apple introdujo la Memoria Unificada (Unified Memory Architecture - UMA).
-
-¿Qué significa esto para el mantenimiento?
-En macOS moderno, "memoria libre es memoria desperdiciada". El núcleo Darwin utiliza de manera proactiva la RAM no ocupada para almacenar en caché archivos leídos recientemente y bibliotecas dinámicas. Cuando una aplicación solicita memoria, macOS desaloja instantáneamente las cachés menos prioritarias en nanosegundos sin ninguna degradación perceptible.
-
-Muchos limpiadores tradicionales ejecutan scripts obsoletos como 'purge' o liberadores en segundo plano que vacían estas cachés a la fuerza. Como resultado, las aplicaciones tienen que volver a leer los archivos desde el SSD, aumentando los ciclos de lectura y consumiendo más batería.
-
-En Aerio, diseñamos un enfoque estrictamente conservador: no tocamos los procesos en ejecución ni las cachés dinámicas del kernel; únicamente detectamos y removemos cachés huérfanas de usuario y contenedores de aplicaciones que ya no están activas.`
-    },
-    {
-      id: 2,
-      title: "Application Support vs. Caches: La línea roja de la seguridad",
-      date: "15 de Febrero, 2026",
-      readTime: "5 min de lectura",
-      tag: "Seguridad & Privacidad",
-      summary: "Por qué Aerio nunca toca documentos, preferencias ni carpetas críticas del sistema, protegiendo tus datos contra pérdidas irreparables.",
-      content: `Cualquier herramienta de limpieza que prometa 'liberar 50 GB con un solo clic' suele ocultar un peligro latente: la eliminación indiscriminada de archivos dentro de ~/Library/Application Support.
-
-En esta carpeta residen bases de datos SQLite de aplicaciones profesionales, credenciales cifradas, historial de chats, plantillas de diseño y configuraciones personalizadas. Borrar elementos aquí puede corromper perfiles enteros de navegadores o inutilizar licencias de software.
-
-La política inquebrantable de Aerio es:
-1. Jamás eliminar bases de datos ni directorios de Application Support de manera automática.
-2. Limitar el análisis a cachés desechables identificadas (~/Library/Caches) y contenedores sandbox huérfanos.
-3. Mostrar siempre una lista detallada con ruta y tamaño antes de cualquier acción.
-4. Si se desinstala una aplicación, enviarla a la Papelera recuperable del sistema en lugar de borrarla de forma destructiva y permanente.`
-    },
-    {
-      id: 3,
-      title: "Optimización nativa: Binarios Universales y Compatibilidad Total",
-      date: "7 de Septiembre, 2026",
-      readTime: "3 min de lectura",
-      tag: "Ingeniería Swift",
-      summary: "El camino técnico hacia Aerio 5.0: cómo logramos fusionar la máxima eficiencia en Apple Silicon con soporte total para procesadores Intel.",
-      content: `Aerio fue reconstruido desde cero pensando en el máximo rendimiento. Con la llegada de la versión 5.0, hemos dado un paso crucial: empaquetar una aplicación Universal verdadera.
-
-Al compilar un solo binario compatible con arquitecturas arm64 (Apple Silicon M1, M2, M3, M4) y x86_64 (Intel Core i5, i7, i9), permitimos que tu Mac elija nativamente el código correcto. En Apple Silicon, Aerio 5.0 ejecuta sus rutinas aprovechando los Efficient Cores sin pasar por Rosetta 2, y en equipos Intel, aprovecha instrucciones optimizadas para macOS 13+.
-
-El resultado es una interfaz fluida a 120 Hz en pantallas ProMotion con un consumo mínimo, garantizando que todos los usuarios de Mac tengan la misma experiencia premium en una sola descarga.`
-    }
-  ];
+  const blogArticles = ARTICLES.slice(0, 3);
 
   return (
     <>
+      <title>Aerio — Limpiador gratuito y seguro para Mac</title>
+      <meta
+        name="description"
+        content="Aerio es un limpiador gratuito para Mac (Apple Silicon e Intel) que elimina cachés huérfanas y desinstala apps de forma segura, sin tocar tus documentos."
+      />
+      <link rel="canonical" href="https://aerio.website/" />
+      <meta property="og:title" content="Aerio — Limpiador gratuito y seguro para Mac" />
+      <meta property="og:description" content="Aerio es un limpiador gratuito para Mac (Apple Silicon e Intel) que elimina cachés huérfanas y desinstala apps de forma segura, sin tocar tus documentos." />
+      <meta property="og:image" content="https://aerio.website/info.png" />
+      <meta property="og:url" content="https://aerio.website/" />
+      <meta property="og:type" content="website" />
+
+      {/* Google AdSense included on landing page */}
+      <AdSenseScript />
+
       {/* [CUSTOMIZACIÓN - FONDO PRINCIPAL]: "bg-black" es el color de fondo, "text-white" el texto principal. */}
       <div className="min-h-screen bg-black text-white selection:bg-purple-500/30 font-sans pb-12 overflow-x-hidden relative">
       
         {/* Static Background Image */}
-        {/* [CUSTOMIZACIÓN - IMAGEN FONDO]: Cambia aquí el alto (h-[900px]) o la opacidad. La imagen se cambia en la url() abajo. */}
         <div 
           className="absolute top-0 left-0 w-full h-[95vh] md:h-[900px] z-0 bg-cover bg-top bg-no-repeat"
-          style={{ backgroundImage: "url('https://aerio-three.vercel.app/bg.png')" }}
+          style={{ backgroundImage: "url('/bg.png')" }}
         >
         {/* Gradient fading to pure black at the bottom to blend with the page */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/40 to-black pointer-events-none" />
@@ -630,7 +598,7 @@ El resultado es una interfaz fluida a 120 Hz en pantallas ProMotion con un consu
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {blogArticles.map((article) => (
             <article 
-              key={article.id}
+              key={article.slug}
               className="bg-white/[0.03] border border-white/10 rounded-[2rem] p-8 flex flex-col justify-between hover:bg-white/[0.06] hover:border-white/20 transition-all duration-300 shadow-xl group"
             >
               <div>
@@ -644,28 +612,39 @@ El resultado es una interfaz fluida a 120 Hz en pantallas ProMotion con un consu
                   </div>
                 </div>
 
-                <h3 className="text-xl font-bold text-white/90 group-hover:text-white leading-snug mb-4 transition-colors">
-                  {article.title}
+                <h3 className="text-xl font-bold text-white/90 group-hover:text-blue-300 leading-snug mb-4 transition-colors">
+                  <Link to={`/blog/${article.slug}`}>
+                    {article.title}
+                  </Link>
                 </h3>
                 
-                <p className="text-white/60 text-sm leading-relaxed mb-6">
-                  {article.summary}
+                <p className="text-white/60 text-sm leading-relaxed mb-6 line-clamp-3">
+                  {article.description}
                 </p>
               </div>
 
               <div className="pt-6 border-t border-white/10 flex items-center justify-between mt-auto">
                 <span className="text-xs text-white/40">{article.date}</span>
-                <button
-                  type="button"
-                  onClick={() => setSelectedArticle(article)}
+                <Link
+                  to={`/blog/${article.slug}`}
                   className="flex items-center gap-1.5 text-xs font-semibold text-blue-400 group-hover:text-blue-300 transition-colors"
                 >
                   <span>Leer artículo</span>
                   <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-                </button>
+                </Link>
               </div>
             </article>
           ))}
+        </div>
+
+        <div className="mt-12 text-center">
+          <Link
+            to="/blog"
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/15 text-white font-semibold text-sm transition-all backdrop-blur-md hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <span>Ver todos los artículos en el Blog</span>
+            <ArrowRight className="w-4 h-4 text-blue-400" />
+          </Link>
         </div>
       </section>
 
@@ -730,15 +709,13 @@ El resultado es una interfaz fluida a 120 Hz en pantallas ProMotion con un consu
               <span>Portafolio</span>
               <ExternalLink className="w-3.5 h-3.5 text-white/60" />
             </a>
-            <a 
-              href="https://aerio-three.vercel.app" 
-              target="_blank" 
-              rel="noreferrer"
+            <Link 
+              to="/acerca" 
               className="px-5 py-2.5 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-all flex items-center gap-2 backdrop-blur-md"
             >
-              <span>aerio-three.vercel.app</span>
-              <ExternalLink className="w-3.5 h-3.5 text-white/60" />
-            </a>
+              <span>Historia & Filosofía</span>
+              <ArrowRight className="w-3.5 h-3.5 text-white/60" />
+            </Link>
           </div>
         </div>
       </section>
@@ -776,81 +753,25 @@ El resultado es una interfaz fluida a 120 Hz en pantallas ProMotion con un consu
         </div>
       </section>
 
-      {/* Modal de Lectura de Artículos del Blog */}
-      <AnimatePresence>
-        {selectedArticle && (
-          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 md:p-10">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedArticle(null)}
-              className="fixed inset-0 bg-black/80 backdrop-blur-md z-[110]"
-            />
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative z-[111] max-w-2xl w-full max-h-[85vh] bg-[#120a1c] border border-white/15 rounded-[2.5rem] p-6 sm:p-10 overflow-y-auto shadow-2xl custom-scrollbar"
-            >
-              <div className="flex items-center justify-between gap-4 mb-6">
-                <span className="text-xs font-semibold px-3 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">
-                  {selectedArticle.tag}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setSelectedArticle(null)}
-                  className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-white/70 hover:text-white flex items-center justify-center transition-colors"
-                  aria-label="Cerrar artículo"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 leading-tight">
-                {selectedArticle.title}
-              </h2>
-
-              <div className="flex items-center gap-4 text-xs text-white/40 pb-6 mb-6 border-b border-white/10">
-                <span>{selectedArticle.date}</span>
-                <span>•</span>
-                <span>{selectedArticle.readTime}</span>
-              </div>
-
-              <div className="text-white/80 leading-relaxed space-y-4 text-base whitespace-pre-line font-normal">
-                {selectedArticle.content}
-              </div>
-
-              <div className="mt-10 pt-6 border-t border-white/10 flex items-center justify-between">
-                <div className="text-xs text-white/50">
-                  Publicado por <strong>Hackerdito</strong>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedArticle(null)}
-                  className="px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-sm font-medium transition-colors"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
       {/* Footer / Credits */}
-      <footer className="relative z-10 mt-20 pt-16 pb-12 px-6 flex flex-col items-center text-center">
-        <div className="w-16 h-16 rounded-[1.25rem] overflow-hidden shadow-2xl shadow-black/50 bg-black border border-white/5 mx-auto mb-8 relative">
-           <div className="absolute inset-0 bg-white/5 flex items-center justify-center mix-blend-overlay" />
-           <img src="https://aerio-three.vercel.app/aerio.png" alt="Aerio Logo" className="w-full h-full object-cover scale-[0.85]" />
+      <footer className="relative z-10 mt-20 pt-16 pb-12 px-6 border-t border-white/10 bg-black/60 backdrop-blur-xl flex flex-col items-center text-center">
+        <div className="w-16 h-16 rounded-[1.25rem] overflow-hidden shadow-2xl shadow-black/50 bg-black border border-white/10 mx-auto mb-6 relative">
+           <img src="/aerio.png" alt="Aerio Logo" className="w-full h-full object-cover scale-[0.85]" />
         </div>
-        <p className="text-white/90 text-lg md:text-xl font-bold tracking-tight mb-8">Aerio está creado por Hackerdito.</p>
-        <div className="flex items-center justify-center gap-4 text-[15px] text-white/50 font-medium">
+        <p className="text-white/90 text-lg md:text-xl font-bold tracking-tight mb-4">Aerio está creado por Hackerdito.</p>
+        
+        <nav aria-label="Enlaces del pie de página" className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm font-medium text-white/70 mb-8 max-w-xl">
+          <Link to="/" className="hover:text-white transition-colors">Inicio</Link>
+          <Link to="/blog" className="hover:text-white transition-colors">Blog</Link>
+          <Link to="/acerca" className="hover:text-white transition-colors">Acerca de</Link>
+          <Link to="/contacto" className="hover:text-white transition-colors">Contacto</Link>
+          <Link to="/privacidad" className="hover:text-white transition-colors">Privacidad</Link>
+          <Link to="/terminos" className="hover:text-white transition-colors">Términos</Link>
           <a href="https://gerardodg.art" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">gerardodg.art</a>
-          <span className="w-1 h-1 rounded-full bg-white/20" />
-          <a href="https://aerio-three.vercel.app" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">aerio-three.vercel.app</a>
+        </nav>
+
+        <div className="text-xs text-white/40">
+          © {new Date().getFullYear()} Aerio. Todos los derechos reservados.
         </div>
       </footer>
 

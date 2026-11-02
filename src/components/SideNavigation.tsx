@@ -12,8 +12,11 @@ import {
   Download, 
   ArrowRight, 
   Sparkles,
-  Apple
+  Apple,
+  Shield,
+  FileText
 } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 
 interface SideNavigationProps {
@@ -26,6 +29,8 @@ export default function SideNavigation({ onDownload, downloading = false }: Side
   const triggerRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Check prefers-reduced-motion
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -110,21 +115,33 @@ export default function SideNavigation({ onDownload, downloading = false }: Side
     },
     {
       label: 'Blog',
-      href: '#blog',
+      href: '/blog',
       icon: BookOpen,
       desc: 'Notas técnicas y optimización macOS'
     },
     {
       label: 'Acerca de Aerio',
-      href: '#acerca-de',
+      href: '/acerca',
       icon: Info,
       desc: 'Filosofía, créditos y desarrollo'
     },
     {
       label: 'Contacto',
-      href: '#contacto',
+      href: '/contacto',
       icon: Mail,
       desc: 'Soporte directo y retroalimentación'
+    },
+    {
+      label: 'Privacidad',
+      href: '/privacidad',
+      icon: Shield,
+      desc: 'Seguridad y política de datos'
+    },
+    {
+      label: 'Términos',
+      href: '/terminos',
+      icon: FileText,
+      desc: 'Condiciones legales y uso'
     }
   ];
 
@@ -132,16 +149,22 @@ export default function SideNavigation({ onDownload, downloading = false }: Side
     e.preventDefault();
     setIsOpen(false);
 
-    const targetId = href.replace('#', '');
-    const element = document.getElementById(targetId);
-
-    if (element) {
-      element.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-      // update hash without jarring jump
-      window.history.pushState(null, '', href);
-    } else if (href === '#inicio') {
-      window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-      window.history.pushState(null, '', '#');
+    if (href.startsWith('#')) {
+      if (location.pathname === '/') {
+        const targetId = href.replace('#', '');
+        const element = document.getElementById(targetId);
+        if (element) {
+          element.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+          window.history.pushState(null, '', href);
+        } else if (href === '#inicio') {
+          window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+          window.history.pushState(null, '', '#');
+        }
+      } else {
+        navigate(`/${href}`);
+      }
+    } else {
+      navigate(href);
     }
   };
 
@@ -199,7 +222,7 @@ export default function SideNavigation({ onDownload, downloading = false }: Side
           title="Aerio - Inicio"
         >
           <div className="w-6 h-6 rounded-[6px] overflow-hidden bg-white/5 flex items-center justify-center border border-white/10">
-            <img src="https://aerio-three.vercel.app/aerio.png" alt="Aerio Logo" className="w-full h-full object-cover" />
+            <img src="/aerio.png" alt="Aerio Logo" className="w-full h-full object-cover" />
           </div>
           <span className="font-semibold text-sm tracking-tight text-white/90 group-hover:text-white">Aerio</span>
         </a>
@@ -249,7 +272,7 @@ export default function SideNavigation({ onDownload, downloading = false }: Side
               <div className="relative p-6 border-b border-white/10 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-[12px] overflow-hidden bg-white/5 flex items-center justify-center border border-white/15 shadow-inner">
-                    <img src="https://aerio-three.vercel.app/aerio.png" alt="Aerio Logo" className="w-full h-full object-cover" />
+                    <img src="/aerio.png" alt="Aerio Logo" className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">

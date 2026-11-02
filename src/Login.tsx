@@ -20,6 +20,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+      <meta name="robots" content="noindex, nofollow" />
       <div className="max-w-md w-full bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl flex flex-col items-center">
         <h1 className="text-2xl font-bold mb-2 text-center">Administración Aerio</h1>
         <p className="text-white/50 mb-8 text-center text-sm">Inicia sesión para ver las estadísticas.</p>
